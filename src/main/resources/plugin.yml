@@ -1,0 +1,5 @@
+name: ErrorSink
+main: me.wiefferink.errorsink.ErrorSink
+version: "${project.version}"
+author: NLThijs48
+website: http://github.com/NLthijs48/ErrorSink

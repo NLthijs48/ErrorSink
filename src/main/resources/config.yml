@@ -1,0 +1,101 @@
+# ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+# ║ config.yml file of the ErrorSink plugin created by NLThijs48.                                                              ║
+# ║ Github can be found at https://github.com/NLthijs48/ErrorSink.                                                             ║
+# ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+# The DSN for the Sentry.io project to send errors to
+# Found under Project Settings in the 'Client Keys (DSN)' tab (use the non-public variant)
+dsn: ""
+# Name of the server reporting the error (useful if you have multiple servers using the same Sentry project)
+serverName: ""
+
+eventRules:
+  # Drop info messages
+  dropInfo:
+    match:
+      level: INFO
+    drop: true
+
+  dropMessageSpam:
+    match:
+      message:
+        # Spammy line-by-line exceptions coming from Skrips
+        - "^#!#!"
+        # One line warning message before printing actual exceptions from async threads
+        - "^Exception in thread \"Craft Scheduler Thread - \\d+\" $"
+        # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
+        - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
+        - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
+        # Spigot bug
+        - "^handleDisconnection\\(\\) called twice$"
+    drop: true
+  dropOnlinePlayersException:
+    match:
+      exception:
+        # Common error for old plugins (hard to fix sometimes)
+        - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
+    drop: true
+
+
+  # Name of the rule
+  OPTIONS:
+    # Which events should match?
+    # If a match option is not set it will match everything
+    match:
+      # The levels to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE, OFF
+      level: ""
+      # Regex matching the message (string or string list)
+      message: ""
+      # Regex matching the exception (string or list)
+      exception: ""
+
+    # Drop the event
+    drop: false
+
+#    # Shown at the top of issues, can easiliy be used as filters
+#    addTags:
+#      serverName: ""
+#
+#    # Data shown at the bottom of issues, cannot be filtered and can show more structured data
+#    addData:
+#      onlinePlayers: ""
+#      bukkitVersion: ""
+#      craftbukkitVersion: ""
+#      pluginVersion: ""
+#      stack: ""
+#
+#    # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
+#    setLevel:
+#    setEnvironment:
+#    setCulprit:
+#    # Change fingerprint options (setup different grouping, for example group together messages that include variables)
+#    # https://docs.sentry.io/learn/rollups/
+#    setFingerprint:
+#    setLogger:
+#    setPlatform:
+#    setRelease:
+#    setTimestamp:
+#    setChecksum:
+#    breadCrumbs: true
+
+breadcrumbs:
+  # Maximum number of entries that can appear in the breadcrumb
+  # Sentry does not advice to use more than 100, and reports exceeding limits might get dropped
+  maximumEntries: 50
+
+  rules:
+    ALL:
+      # Regex to match breadcrumbs (single or list)
+      match:
+      # Drop this matching entry
+      drop: false
+      # Type of the breadcrumb entry (determines the icon on Sentry)
+      # Current useful values: default, debug, user, location, http (hides message), navigation
+      type: "default"
+      # Category of the breadcrumb (text shown at the start of the breadcrumb, around 16 characters maximum length)
+      category: " "
+      # error, warning, info, debug, default
+      level: "default"
+
+# Print debug messages to the console
+debug: false
