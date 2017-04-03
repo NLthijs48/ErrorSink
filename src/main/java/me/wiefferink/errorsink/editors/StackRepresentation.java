@@ -23,10 +23,16 @@ public class StackRepresentation extends EventEditor {
 			"^java.util.logging.Logger", // Logging getting to this class
 			"^com.getsentry", // Raven building the event
 			"^java.util.logging.Logger", // Java logging
-			"^org.bukkit.plugin.PluginLogger", // Bukkit logging
 			"^org.apache.logging.log4j", // Log4j
+			"^java.lang.Thread.getStackTrace", // Getting stacktrace
+
+			// Spigot internal logging
+			"^org.bukkit.plugin.PluginLogger", // Bukkit logging
 			"^org.bukkit.craftbukkit.[0-9a-zA-Z_]+.util.ForwardLogHandler", // Log forwarder of Spigot
-			"^java.lang.Thread.getStackTrace" // Getting stacktrace
+			"^org.bukkit.craftbukkit.[0-9a-zA-Z_]+.LoggerOutputStream.flush",
+			"^sun.nio.cs.StreamEncoder.",
+			"^java.io.PrintStream.",
+			"^java.io.OutputStreamWriter."
 	));
 	private final static Set<Pattern> ignorePatterns = new HashSet<>();
 	static {
