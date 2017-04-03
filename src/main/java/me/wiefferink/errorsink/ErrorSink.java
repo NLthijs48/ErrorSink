@@ -7,6 +7,7 @@ import com.getsentry.raven.dsn.InvalidDsnException;
 import me.wiefferink.errorsink.editors.BreadcrumbCollector;
 import me.wiefferink.errorsink.editors.RuleData;
 import me.wiefferink.errorsink.editors.StackRepresentation;
+import me.wiefferink.errorsink.filters.ErrorSinkFilter;
 import me.wiefferink.errorsink.filters.RuleFilter;
 import me.wiefferink.errorsink.tools.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -53,8 +54,6 @@ public class ErrorSink extends JavaPlugin {
 			}
 		}
 
-		Log.debug("matchermap:", matcherMap);
-
 		startCollecting(dsn);
 	}
 
@@ -96,6 +95,7 @@ public class ErrorSink extends JavaPlugin {
 		appender = new BukkitSentryAppender(raven);
 
 		// Filters
+		appender.addFilter(new ErrorSinkFilter());
 		appender.addFilter(new RuleFilter());
 
 		// Editors

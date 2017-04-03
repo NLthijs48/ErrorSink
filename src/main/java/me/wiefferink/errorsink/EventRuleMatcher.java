@@ -74,7 +74,6 @@ public class EventRuleMatcher {
 	public boolean matches(String message, Level level, Throwable throwable) {
 		// Level match
 		if(levelMatches != null && !levelMatches.contains(level.intLevel())) {
-			Log.debug("level mismatch");
 			return false;
 		}
 
@@ -85,13 +84,11 @@ public class EventRuleMatcher {
 				for(Pattern messagePattern : messagePatterns) {
 					if(messagePattern.matcher(message).matches()) {
 						messageMatches = true;
-						Log.debug("message match");
 						break;
 					}
 				}
 			}
 			if(!messageMatches) {
-				Log.debug("message mismatch");
 				return false;
 			}
 		}
@@ -103,18 +100,15 @@ public class EventRuleMatcher {
 				for(Pattern exceptionPattern : exceptionPatterns) {
 					if(exceptionPattern.matcher(ExceptionUtils.getStackTrace(throwable)).matches()) {
 						exceptionMatches = true;
-						Log.debug("exception match");
 						break;
 					}
 				}
 			}
 			if(!exceptionMatches) {
-				Log.debug("exception mismatch");
 				return false;
 			}
 		}
 
-		Log.debug("does match");
 		return true;
 	}
 

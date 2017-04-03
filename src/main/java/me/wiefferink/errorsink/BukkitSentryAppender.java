@@ -9,6 +9,7 @@ import com.getsentry.raven.log4j2.SentryAppender;
 import com.getsentry.raven.util.Util;
 import me.wiefferink.errorsink.editors.EventEditor;
 import me.wiefferink.errorsink.tools.Log;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
@@ -138,14 +139,11 @@ public class BukkitSentryAppender extends SentryAppender {
 			try {
 				eventEditor.processEvent(eventBuilder, event);
 			} catch(Exception e) {
-				// TODO log properly
-				Log.debug("EventEditor " + eventEditor.getClass().getName() + " failed:");
-				e.printStackTrace(System.out);
+				Log.error("EventEditor", eventEditor.getClass().getName(), "failed:", ExceptionUtils.getStackTrace(e));
 			}
 		}
 
-		Log.debug("sending event to sentry:", eventBuilder);
-
+		Log.debug("Sending event to sentry:", eventBuilder);
 		return eventBuilder.build();
 	}
 }
