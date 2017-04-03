@@ -7,3 +7,9 @@ Now restart your server and the ErrorSink plugin should not have any errors/warn
 
 If any plugin produces an error or warning it should show up in Sentry.
 You might want to disable data scrubbing in the Sentry project settings, because otherwise all ips are stripped from the messages.
+
+## TODO
+- Add proper guide to setup the plugin
+- Setup issue labels etc
+- Setup Jenkins build server
+- Implement missing config options
