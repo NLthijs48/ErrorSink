@@ -6,3 +6,4 @@ Start your server to generate a default config, after this put the DSN into the 
 Now restart your server and the ErrorSink plugin should not have any errors/warnings anymore.
 
 If any plugin produces an error or warning it should show up in Sentry.
+You might want to disable data scrubbing in the Sentry project settings, because otherwise all ips are stripped from the messages.
