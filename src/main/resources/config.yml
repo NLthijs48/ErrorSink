@@ -10,10 +10,10 @@ dsn: ""
 serverName: ""
 
 eventRules:
-  # Drop info messages
+  # Drop info and debug messages
   dropInfo:
     match:
-      level: INFO
+      level: ["INFO", "DEBUG", "OFF"]
     drop: true
 
   dropMessageSpam:
@@ -43,7 +43,7 @@ eventRules:
     # If a match option is not set it will match everything
     match:
       # The levels to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE, OFF
-      level: ""
+      level: []
       # Regex matching the message (string or string list)
       message: ""
       # Regex matching the exception (string or list)
@@ -52,18 +52,23 @@ eventRules:
     # Drop the event
     drop: false
 
-#    # Shown at the top of issues, can easiliy be used as filters
-#    addTags:
-#      serverName: ""
-#
-#    # Data shown at the bottom of issues, cannot be filtered and can show more structured data
-#    addData:
-#      onlinePlayers: ""
-#      bukkitVersion: ""
-#      craftbukkitVersion: ""
-#      pluginVersion: ""
-#      stack: ""
-#
+    # Shown at the top of issues, can easiliy be used as filters
+    addTags:
+      tag: "some text"
+
+    # Data shown at the bottom of issues, cannot be filtered and can show more structured data
+    addData:
+      Text: "A story"
+      Multiline-text: |
+        First line,
+        also important line
+      List: ["a", "b", "c"]
+      Complex:
+        A: "a"
+        B:
+          C: 123
+          D: ["d", "e"]
+
 #    # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
 #    setLevel:
 #    setEnvironment:
@@ -78,24 +83,24 @@ eventRules:
 #    setChecksum:
 #    breadCrumbs: true
 
-breadcrumbs:
-  # Maximum number of entries that can appear in the breadcrumb
-  # Sentry does not advice to use more than 100, and reports exceeding limits might get dropped
-  maximumEntries: 50
-
-  rules:
-    ALL:
-      # Regex to match breadcrumbs (single or list)
-      match:
-      # Drop this matching entry
-      drop: false
-      # Type of the breadcrumb entry (determines the icon on Sentry)
-      # Current useful values: default, debug, user, location, http (hides message), navigation
-      type: "default"
-      # Category of the breadcrumb (text shown at the start of the breadcrumb, around 16 characters maximum length)
-      category: " "
-      # error, warning, info, debug, default
-      level: "default"
+#breadcrumbs:
+#  # Maximum number of entries that can appear in the breadcrumb
+#  # Sentry does not advice to use more than 100, and reports exceeding limits might get dropped
+#  maximumEntries: 50
+#
+#  rules:
+#    ALL:
+#      # Regex to match breadcrumbs (single or list)
+#      match:
+#      # Drop this matching entry
+#      drop: false
+#      # Type of the breadcrumb entry (determines the icon on Sentry)
+#      # Current useful values: default, debug, user, location, http (hides message), navigation
+#      type: "default"
+#      # Category of the breadcrumb (text shown at the start of the breadcrumb, around 16 characters maximum length)
+#      category: " "
+#      # error, warning, info, debug, default
+#      level: "default"
 
 # Print debug messages to the console
 debug: false

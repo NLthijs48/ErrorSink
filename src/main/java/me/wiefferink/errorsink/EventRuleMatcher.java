@@ -5,6 +5,7 @@ import me.wiefferink.errorsink.tools.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,9 @@ public class EventRuleMatcher {
 	private ConfigurationSection criteria;
 
 	public EventRuleMatcher(ConfigurationSection criteria) {
+		if(criteria == null) {
+			criteria = new YamlConfiguration();
+		}
 		this.criteria = criteria;
 
 		Log.debug("Preparing EventRuleMatcher:", criteria.getCurrentPath());
@@ -72,8 +76,11 @@ public class EventRuleMatcher {
 	 * @return true if the event matches this rule, otherwise false
 	 */
 	public boolean matches(String message, Level level, Throwable throwable) {
+		//Log.debug("matching", criteria.getCurrentPath());
+
 		// Level match
 		if(levelMatches != null && !levelMatches.contains(level.intLevel())) {
+			//Log.debug("  no level match");
 			return false;
 		}
 
@@ -89,6 +96,7 @@ public class EventRuleMatcher {
 				}
 			}
 			if(!messageMatches) {
+				//Log.debug("  no message match");
 				return false;
 			}
 		}
@@ -106,10 +114,12 @@ public class EventRuleMatcher {
 				}
 			}
 			if(!exceptionMatches) {
+				//Log.debug("  no exception match");
 				return false;
 			}
 		}
 
+		//Log.debug("  matches!");
 		return true;
 	}
 
