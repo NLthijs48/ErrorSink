@@ -97,8 +97,9 @@ public class EventRuleMatcher {
 		if(exceptionPatterns != null) {
 			boolean exceptionMatches = false;
 			if(throwable != null) {
+				String exception = ExceptionUtils.getStackTrace(throwable);
 				for(Pattern exceptionPattern : exceptionPatterns) {
-					if(exceptionPattern.matcher(ExceptionUtils.getStackTrace(throwable)).matches()) {
+					if(exceptionPattern.matcher(exception).matches()) {
 						exceptionMatches = true;
 						break;
 					}
