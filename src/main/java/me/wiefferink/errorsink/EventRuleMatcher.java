@@ -43,7 +43,7 @@ public class EventRuleMatcher {
 				try {
 					messagePatterns.add(Pattern.compile(messageRegex));
 				} catch(PatternSyntaxException e) {
-					// TODO log
+					Log.warn("Incorrect message regex \"" + messageRegex + "\" at", criteria.getCurrentPath() + ":", ExceptionUtils.getStackTrace(e));
 				}
 			}
 		}
@@ -57,7 +57,7 @@ public class EventRuleMatcher {
 				try {
 					exceptionPatterns.add(Pattern.compile(exceptionRegex));
 				} catch(PatternSyntaxException e) {
-					// TODO log
+					Log.warn("Incorrect exception regex \"" + exceptionRegex + "\" at", criteria.getCurrentPath() + ":", ExceptionUtils.getStackTrace(e));
 				}
 			}
 		}
