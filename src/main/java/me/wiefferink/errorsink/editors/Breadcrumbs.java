@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BreadcrumbCollector extends EventEditor {
+public class Breadcrumbs extends EventEditor {
 
 	private final LinkedList<LogEvent> breadcrumbs = new LinkedList<>();
 	private int maximumEntries = 50;
@@ -28,7 +28,7 @@ public class BreadcrumbCollector extends EventEditor {
 	private Logger logger;
 	private Appender breadcrumbAppender;
 
-	public BreadcrumbCollector(Logger logger) {
+	public Breadcrumbs(Logger logger) {
 		this.logger = logger;
 		maximumEntries = ErrorSink.getInstance().getConfig().getInt("breadcrumbs.maximumEntries", 50);
 		breadcrumbAppender = new AbstractAppender("Breadcrumb Builder", null, null, false) {

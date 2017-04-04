@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 // Add information about the current stack
-public class StackRepresentation extends EventEditor {
+public class StackInformation extends EventEditor {
 
 	// package+class+method prefixes to ignore
 	// Dots will be seen as anything, but that does not really matter

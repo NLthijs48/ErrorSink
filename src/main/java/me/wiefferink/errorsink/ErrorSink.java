@@ -4,9 +4,10 @@ import com.getsentry.raven.DefaultRavenFactory;
 import com.getsentry.raven.Raven;
 import com.getsentry.raven.RavenFactory;
 import com.getsentry.raven.dsn.InvalidDsnException;
-import me.wiefferink.errorsink.editors.BreadcrumbCollector;
+import me.wiefferink.errorsink.editors.Breadcrumbs;
+import me.wiefferink.errorsink.editors.PluginInformation;
 import me.wiefferink.errorsink.editors.RuleData;
-import me.wiefferink.errorsink.editors.StackRepresentation;
+import me.wiefferink.errorsink.editors.StackInformation;
 import me.wiefferink.errorsink.filters.ErrorSinkFilter;
 import me.wiefferink.errorsink.filters.RuleFilter;
 import me.wiefferink.errorsink.tools.Log;
@@ -25,7 +26,6 @@ import java.util.Map;
 // TODO try changing System.err logging to level error instead of warn?
 // TODO command to add breadcrubms?
 // TODO command to reload config?
-// TODO add plugin versions
 public class ErrorSink extends JavaPlugin {
 
 	private static ErrorSink instance;
@@ -99,9 +99,10 @@ public class ErrorSink extends JavaPlugin {
 		appender.addFilter(new RuleFilter());
 
 		// Editors
-		appender.addEventEditor(new BreadcrumbCollector(logger));
+		appender.addEventEditor(new Breadcrumbs(logger));
 		appender.addEventEditor(new RuleData());
-		appender.addEventEditor(new StackRepresentation());
+		appender.addEventEditor(new StackInformation());
+		appender.addEventEditor(new PluginInformation());
 
 		// Default data
 		appender.setServerName(getServerName());
@@ -144,7 +145,7 @@ public class ErrorSink extends JavaPlugin {
 	public boolean match(String matcherPath, String message, Level level, Throwable throwable) {
 		EventRuleMatcher matcher = matcherMap.get(matcherPath);
 		if(matcher == null) {
-			// TODO log
+			Log.error("Trying to match path", matcherPath, "but there is no EventRuleMatcher!");
 			return false;
 		}
 

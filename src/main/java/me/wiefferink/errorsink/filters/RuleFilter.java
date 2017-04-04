@@ -30,7 +30,6 @@ public class RuleFilter extends AbstractFilter {
 	 */
 	private Filter.Result process(String message, Level level, Throwable throwable) {
 		if(rules == null) {
-			// TODO log
 			return Result.NEUTRAL;
 		}
 
