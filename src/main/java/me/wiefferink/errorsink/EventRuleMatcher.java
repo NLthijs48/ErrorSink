@@ -89,7 +89,7 @@ public class EventRuleMatcher {
 			boolean messageMatches = false;
 			if(message != null) {
 				for(Pattern messagePattern : messagePatterns) {
-					if(messagePattern.matcher(message).matches()) {
+					if(messagePattern.matcher(message).find()) {
 						messageMatches = true;
 						break;
 					}
@@ -107,7 +107,7 @@ public class EventRuleMatcher {
 			if(throwable != null) {
 				String exception = ExceptionUtils.getStackTrace(throwable);
 				for(Pattern exceptionPattern : exceptionPatterns) {
-					if(exceptionPattern.matcher(exception).matches()) {
+					if(exceptionPattern.matcher(exception).find()) {
 						exceptionMatches = true;
 						break;
 					}
