@@ -22,7 +22,7 @@ eventRules:
         # Spammy line-by-line exceptions coming from Skrips
         - "^#!#!"
         # One line warning message before printing actual exceptions from async threads
-        - "^Exception in thread \"Craft Scheduler Thread - \\d+\" $"
+        - "^Exception in thread \"(Craft Scheduler )?Thread - \\d+\" $"
         # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
         - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
         - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
@@ -53,11 +53,11 @@ eventRules:
     drop: false
 
     # Shown at the top of issues, can easiliy be used as filters
-    addTags:
+    tags:
       tag: "some text"
 
     # Data shown at the bottom of issues, cannot be filtered and can show more structured data
-    addData:
+    data:
       Text: "A story"
       Multiline-text: |
         First line,
@@ -69,6 +69,8 @@ eventRules:
           C: 123
           D: ["d", "e"]
 
+    # String or array used to determine event grouping
+    fingerprint: []
 #    # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
 #    setLevel:
 #    setEnvironment:

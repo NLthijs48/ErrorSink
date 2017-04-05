@@ -2,10 +2,12 @@ package me.wiefferink.errorsink.editors;
 
 import com.getsentry.raven.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
+import me.wiefferink.errorsink.tools.Utils;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -49,7 +51,7 @@ public class RuleData extends EventEditor {
 				}
 
 				// Add tags
-				ConfigurationSection tagsSection = rules.getConfigurationSection(ruleKey + ".addTags");
+				ConfigurationSection tagsSection = rules.getConfigurationSection(ruleKey + ".tags");
 				if(tagsSection != null) {
 					for(String tagKey : tagsSection.getKeys(false)) {
 						String tagValue = tagsSection.getString(tagKey);
@@ -60,7 +62,7 @@ public class RuleData extends EventEditor {
 				}
 
 				// Add data
-				ConfigurationSection dataSection = rules.getConfigurationSection(ruleKey + ".addData");
+				ConfigurationSection dataSection = rules.getConfigurationSection(ruleKey + ".data");
 				if(dataSection != null) {
 					for(String datakey : dataSection.getKeys(false)) {
 						Object dataValue = getValue(dataSection, datakey);
@@ -68,6 +70,12 @@ public class RuleData extends EventEditor {
 							eventBuilder.withExtra(datakey, dataValue);
 						}
 					}
+				}
+
+				// Fingerprint
+				List<String> fingerPrint = Utils.singleOrList(rules, ruleKey + ".fingerprint");
+				if(fingerPrint != null) {
+					eventBuilder.withFingerprint(fingerPrint);
 				}
 			}
 		}
