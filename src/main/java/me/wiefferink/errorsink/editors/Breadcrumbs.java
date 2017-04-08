@@ -11,12 +11,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,25 +53,27 @@ public class Breadcrumbs extends EventEditor {
 
 				// Match tags in the front of the message and set that as category instead
 				builder.setCategory(" "); // Empty to indicate regular logging
-				builder.setType("default");
-				String message = logEvent.getMessage().getFormattedMessage();
+                builder.setType(Breadcrumb.Type.DEFAULT);
+                String message = logEvent.getMessage().getFormattedMessage();
 				Matcher matcher = tagPrefix.matcher(message);
 				if(matcher.find()) {
 					message = message.substring(matcher.group().length());
 					builder.setCategory(matcher.group().substring(1, matcher.group().length() - 2));
 				} else if(message.contains(" lost connection: ")) {
 					builder.setCategory("<<<");
-					builder.setType("navigation");
-				} else if(message.contains(" logged in with entity id ")) {
+                    builder.setType(Breadcrumb.Type.NAVIGATION);
+                } else if(message.contains(" logged in with entity id ")) {
 					builder.setCategory(">>>");
-					builder.setType("navigation");
-				} else if(message.contains(" issued server command: ") && !message.contains("CONSOLE issued server command: ")) {
+                    builder.setType(Breadcrumb.Type.NAVIGATION);
+                } else if(message.contains(" issued server command: ") && !message.contains("CONSOLE issued server command: ")) {
 					builder.setCategory("Command");
-					builder.setType("user");
-				} else if(logEvent.getThreadName().contains("Chat Thread")) {
+                    // TODO change to Type.USER if/when pull request is accepted
+                    builder.setType(Breadcrumb.Type.NAVIGATION);
+                } else if(logEvent.getThreadName().contains("Chat Thread")) {
 					builder.setCategory("Chat");
-					builder.setType("user");
-				}
+                    // TODO change to Type.USER if/when pull request is accepted
+                    builder.setType(Breadcrumb.Type.NAVIGATION);
+                }
 				builder.setMessage(message);
 
 				Map<String, String> data = new HashMap<>();
@@ -96,14 +93,18 @@ public class Breadcrumbs extends EventEditor {
 	 * @param logEvent The record to calculate a level for
 	 * @return The level of the record
 	 */
-	private String getBreadcrumbLevel(LogEvent logEvent) {
-		if(logEvent.getLevel().equals(Level.WARN)) {
-			return "warning";
-		} else if(logEvent.getLevel().isAtLeastAsSpecificAs(Level.ERROR)) {
-			return "error";
-		} else {
-			return "info";
-		}
+    private Breadcrumb.Level getBreadcrumbLevel(LogEvent logEvent) {
+        if(logEvent.getLevel().equals(Level.WARN)) {
+            return Breadcrumb.Level.WARNING;
+        } else if (logEvent.getLevel().equals(Level.ERROR)) {
+            return Breadcrumb.Level.ERROR;
+        } else if (logEvent.getLevel().equals(Level.FATAL)) {
+            return Breadcrumb.Level.CRITICAL;
+        } else if (logEvent.getLevel().equals(Level.DEBUG)) {
+            return Breadcrumb.Level.DEBUG;
+        } else {
+            return Breadcrumb.Level.INFO;
+        }
 	}
 
 	@Override
