@@ -56,7 +56,7 @@ eventRules:
     tags:
       tag: "some text"
 
-    # Data shown at the bottom of issues, cannot be filtered and can show more structured data
+    # Data shown at the bottom of issues, cannot be filtered, but can provide detailed context
     data:
       Text: "A story"
       Multiline-text: |
@@ -70,21 +70,19 @@ eventRules:
           D: ["d", "e"]
 
     # String or array used to determine event grouping
-    fingerprint: []
+    fingerprint:
     # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
     level:
-#    setLevel:
-#    setEnvironment:
-#    setCulprit:
-#    # Change fingerprint options (setup different grouping, for example group together messages that include variables)
-#    # https://docs.sentry.io/learn/rollups/
-#    setFingerprint:
-#    setLogger:
-#    setPlatform:
-#    setRelease:
-#    setTimestamp:
-#    setChecksum:
-#    breadCrumbs: true
+    # Set the environment (displayed as tag)
+    environment:
+    # Set the culprit (displayed as sub-header of issues on Sentry)
+    culprit:
+    # Set the logger (displayed after the sub-header of issues on Sentry)
+    logger:
+    # Set the release (displayed as tag and each version is displayed in the releases tab, version of ErrorSink by default)
+    release:
+    # Set the platform (displayed as tag)
+    platform:
 
 #breadcrumbs:
 #  # Maximum number of entries that can appear in the breadcrumb

@@ -80,16 +80,47 @@ public class RuleData extends EventEditor {
 					eventBuilder.withFingerprint(fingerPrint);
 				}
 
-                // Level
-                String levelString = rules.getString(ruleKey + ".level");
-                if (levelString != null) {
-                    try {
-                        eventBuilder.withLevel(Event.Level.valueOf(levelString));
-                    } catch (IllegalArgumentException e) {
-                        Log.warn("Incorrect level \"" + levelString + "\" for rule", rules.getCurrentPath() + "." + ruleKey);
-                    }
-                }
-            }
+				// Level
+				String levelString = rules.getString(ruleKey + ".level");
+				if (levelString != null) {
+					try {
+						eventBuilder.withLevel(Event.Level.valueOf(levelString));
+					} catch (IllegalArgumentException e) {
+						Log.warn("Incorrect level \"" + levelString + "\" for rule", rules.getCurrentPath() + "." + ruleKey);
+					}
+				}
+
+				// Environment
+				String environment = rules.getString(ruleKey + ".environment");
+				if (environment != null) {
+					eventBuilder.withEnvironment(environment);
+				}
+
+				// Culprit
+				String culprit = rules.getString(ruleKey + ".culprit");
+				if (culprit != null) {
+					eventBuilder.withCulprit(culprit);
+				}
+
+				// Logger
+				String logger = rules.getString(ruleKey + ".logger");
+				if (logger != null) {
+					eventBuilder.withLogger(logger);
+				}
+
+				// Release
+				String release = rules.getString(ruleKey + ".release");
+				if (release != null) {
+					eventBuilder.withRelease(release);
+				}
+
+				// Platform
+				String platform = rules.getString(ruleKey + ".platform");
+				if (platform != null) {
+					eventBuilder.withPlatform(platform);
+				}
+
+			}
 		}
 
 	}
