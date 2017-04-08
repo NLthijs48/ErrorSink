@@ -71,7 +71,8 @@ eventRules:
 
     # String or array used to determine event grouping
     fingerprint: []
-#    # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
+    # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
+    level:
 #    setLevel:
 #    setEnvironment:
 #    setCulprit:

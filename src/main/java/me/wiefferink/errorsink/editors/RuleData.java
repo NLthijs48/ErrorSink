@@ -1,7 +1,9 @@
 package me.wiefferink.errorsink.editors;
 
+import com.getsentry.raven.event.Event;
 import com.getsentry.raven.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
+import me.wiefferink.errorsink.tools.Log;
 import me.wiefferink.errorsink.tools.Utils;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
@@ -77,7 +79,17 @@ public class RuleData extends EventEditor {
 				if(fingerPrint != null) {
 					eventBuilder.withFingerprint(fingerPrint);
 				}
-			}
+
+                // Level
+                String levelString = rules.getString(ruleKey + ".level");
+                if (levelString != null) {
+                    try {
+                        eventBuilder.withLevel(Event.Level.valueOf(levelString));
+                    } catch (IllegalArgumentException e) {
+                        Log.warn("Incorrect level \"" + levelString + "\" for rule", rules.getCurrentPath() + "." + ruleKey);
+                    }
+                }
+            }
 		}
 
 	}
