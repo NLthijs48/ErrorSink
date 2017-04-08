@@ -99,7 +99,6 @@ public class ErrorSink extends JavaPlugin {
 		appender.addFilter(new RuleFilter());
 
 		// Editors
-		appender.addEventEditor(new Breadcrumbs(logger));
 		appender.addEventEditor(new RuleData());
 		appender.addEventEditor(new StackInformation());
 		appender.addEventEditor(new PluginInformation());
@@ -111,6 +110,9 @@ public class ErrorSink extends JavaPlugin {
 		// Start the collector
 		appender.start();
 		logger.addAppender(appender);
+
+		// Add later to prevent reported messages also appearing in the breadcrumbs
+		appender.addEventEditor(new Breadcrumbs(logger));
 	}
 
 	/**
