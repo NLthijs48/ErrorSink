@@ -9,48 +9,39 @@ dsn: ""
 # Name of the server reporting the error (useful if you have multiple servers using the same Sentry project)
 serverName: ""
 
+# Drop events that match any of the rules (to filter out spam and false positives)
+filterRules:
+  info:
+    # Drop info and debug messages
+    level: ["INFO", "DEBUG", "OFF"]
+  spam:
+    message:
+      # Spammy line-by-line exceptions coming from Skrips
+      - "^#!#!"
+      # One line warning message before printing actual exceptions from async threads
+      - "^Exception in thread \"(Craft Scheduler )?Thread - \\d+\" $"
+      # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
+      - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
+      - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
+      # Spigot bug
+      - "^handleDisconnection\\(\\) called twice$"
+  onlinePlayersException:
+    exception:
+      # Common error for old plugins (hard to fix sometimes)
+      - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
+
+# Add information to events and/or change their properties
 eventRules:
-  # Drop info and debug messages
-  dropInfo:
-    match:
-      level: ["INFO", "DEBUG", "OFF"]
-    drop: true
-
-  dropMessageSpam:
-    match:
-      message:
-        # Spammy line-by-line exceptions coming from Skrips
-        - "^#!#!"
-        # One line warning message before printing actual exceptions from async threads
-        - "^Exception in thread \"(Craft Scheduler )?Thread - \\d+\" $"
-        # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
-        - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
-        - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
-        # Spigot bug
-        - "^handleDisconnection\\(\\) called twice$"
-    drop: true
-  dropOnlinePlayersException:
-    match:
-      exception:
-        # Common error for old plugins (hard to fix sometimes)
-        - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
-    drop: true
-
-
   # Name of the rule
   OPTIONS:
-    # Which events should match?
-    # If a match option is not set it will match everything
-    match:
-      # The levels to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE, OFF
-      level: []
-      # Regex matching the message (string or string list)
-      message: ""
-      # Regex matching the exception (string or list)
-      exception: ""
-
-    # Drop the event
-    drop: false
+    #### Which events should this rule apply to?
+    #### level, message and exception need to match, if one is unset it will match anything
+    # The level(s) to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE
+    level: []
+    # Regex(es) matching the message (string or list)
+    message: ""
+    # Regex(es) matching the exception (string or list)
+    exception: ""
 
     # Shown at the top of issues, can easiliy be used as filters
     tags:
@@ -69,7 +60,7 @@ eventRules:
           C: 123
           D: ["d", "e"]
 
-    # String or array used to determine event grouping
+    # String or array used to determine event grouping (events group together on an exact match)
     fingerprint:
     # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
     level:

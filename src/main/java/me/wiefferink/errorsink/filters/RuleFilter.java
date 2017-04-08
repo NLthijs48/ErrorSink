@@ -20,7 +20,7 @@ public class RuleFilter extends AbstractFilter {
 	 */
 	public RuleFilter() {
 		super(Filter.Result.DENY, Filter.Result.NEUTRAL);
-		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("eventRules");
+		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("filterRules");
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class RuleFilter extends AbstractFilter {
 			}
 
 			// Match event
-			if(ErrorSink.getInstance().match("eventRules." + ruleKey, message, level, throwable)) {
+			if (ErrorSink.getInstance().match("filterRules." + ruleKey, message, level, throwable)) {
 				return onMatch;
 			}
 		}

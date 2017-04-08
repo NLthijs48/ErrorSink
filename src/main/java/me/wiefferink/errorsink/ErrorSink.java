@@ -19,7 +19,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // TODO implement shutdown method with cleanup
@@ -46,11 +48,14 @@ public class ErrorSink extends JavaPlugin {
 			return;
 		}
 
+		List<String> matchSectionNames = Arrays.asList("filterRules", "eventRules");
 		matcherMap = new HashMap<>();
-		ConfigurationSection eventRulesSection = getConfig().getConfigurationSection("eventRules");
-		if(eventRulesSection != null) {
-			for(String eventRuleKey : eventRulesSection.getKeys(false)) {
-				matcherMap.put(eventRulesSection.getCurrentPath() + "." + eventRuleKey, new EventRuleMatcher(eventRulesSection.getConfigurationSection(eventRuleKey + ".match")));
+		for (String matchSectionName : matchSectionNames) {
+			ConfigurationSection matchSection = getConfig().getConfigurationSection(matchSectionName);
+			if (matchSection != null) {
+				for (String eventRuleKey : matchSection.getKeys(false)) {
+					matcherMap.put(matchSection.getCurrentPath() + "." + eventRuleKey, new EventRuleMatcher(matchSection.getConfigurationSection(eventRuleKey)));
+				}
 			}
 		}
 
