@@ -114,6 +114,7 @@ public class EventRuleMatcher {
 	 * @param level     The level of the event
 	 * @param throwable The Throwable of the event
 	 * @param threadName The name of the thread to match
+	 * @param loggerName The name of the logger to match
 	 * @return true if the event matches this rule, otherwise false
 	 */
 	public boolean matches(String message, Level level, Throwable throwable, String threadName, String loggerName) {
