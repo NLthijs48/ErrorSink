@@ -3,96 +3,125 @@
 # ║ Github can be found at https://github.com/NLthijs48/ErrorSink.                                                             ║
 # ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-# The DSN for the Sentry.io project to send errors to
+# The DSN for the https://sentry.io project to send errors to
 # Found under Project Settings in the 'Client Keys (DSN)' tab (use the non-public variant)
 dsn: ""
 # Name of the server reporting the error (useful if you have multiple servers using the same Sentry project)
+# Defaults to the name specified in server.properties
 serverName: ""
 
-# Drop events that match any of the rules (to filter out spam and false positives)
-filterRules:
-  info:
-    # Drop info and debug messages
-    level: ["INFO", "DEBUG", "OFF"]
-  spam:
-    message:
-      # Spammy line-by-line exceptions coming from Skrips
-      - "^#!#!"
-      # One line warning message before printing actual exceptions from async threads
-      - "^Exception in thread \"(Craft Scheduler )?Thread - \\d+\" $"
-      # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
-      - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
-      - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
-      # Spigot bug
-      - "^handleDisconnection\\(\\) called twice$"
-  onlinePlayersException:
-    exception:
-      # Common error for old plugins (hard to fix sometimes)
-      - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
+events:
+  # Drop events that match any of the rules (to filter out spam and false positives)
+  filters:
+    info:
+      # Drop info and debug messages
+      matchLevel: ["INFO", "DEBUG", "OFF"]
+    spam:
+      matchMessage:
+        # Spammy line-by-line exceptions coming from Skrips
+        - "^#!#!"
+        # One line warning message before printing actual exceptions from async threads
+        - "^Exception in thread \"(Craft Scheduler )?Thread - \\d+\" $"
+        # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
+        - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
+        - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
+        # Spigot bug
+        - "^handleDisconnection\\(\\) called twice$"
+    onlinePlayersException:
+      matchException:
+        # Common error for old plugins (hard to fix sometimes)
+        - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
 
-# Add information to events and/or change their properties
-eventRules:
-  # Name of the rule
-  OPTIONS:
-    #### Which events should this rule apply to?
-    #### level, message and exception need to match, if one is unset it will match anything
-    # The level(s) to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE
-    level: []
-    # Regex(es) matching the message (string or list)
-    message: ""
-    # Regex(es) matching the exception (string or list)
-    exception: ""
+  # Add information to events and/or change their properties
+  rules:
+    # Name of the rule
+    OPTIONS:
+      #### Which events should this rule apply to?
+      #### level, message and exception need to match, if one is unset it will match anything
+      # The level(s) to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE
+      matchLevel: []
+      # Regex(es) matching the message (string or list)
+      matchMessage: ""
+      # Regex(es) matching the exception (string or list)
+      matchException: ""
 
-    # Shown at the top of issues, can easiliy be used as filters
-    tags:
-      tag: "some text"
+       # Shown at the top of issues, can easiliy be used as filters
+      tags:
+        tag: "some text"
 
-    # Data shown at the bottom of issues, cannot be filtered, but can provide detailed context
-    data:
-      Text: "A story"
-      Multiline-text: |
-        First line,
-        also important line
-      List: ["a", "b", "c"]
-      Complex:
-        A: "a"
-        B:
-          C: 123
-          D: ["d", "e"]
+      # Data shown at the bottom of issues, cannot be filtered, but can provide detailed context
+      data:
+        Text: "A story"
+        Multiline-text: |
+          First line,
+          also important line
+        List: ["a", "b", "c"]
+        Complex:
+          A: "a"
+          B:
+            C: 123
+            D: ["d", "e"]
 
-    # String or array used to determine event grouping (events group together on an exact match)
-    fingerprint:
-    # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
-    level:
-    # Set the environment (displayed as tag)
-    environment:
-    # Set the culprit (displayed as sub-header of issues on Sentry)
-    culprit:
-    # Set the logger (displayed after the sub-header of issues on Sentry)
-    logger:
-    # Set the release (displayed as tag and each version is displayed in the releases tab, version of ErrorSink by default)
-    release:
-    # Set the platform (displayed as tag)
-    platform:
+      # String or array used to determine event grouping (events group together on an exact match)
+      fingerprint:
+      # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
+      level:
+      # Set the environment (displayed as tag)
+      environment:
+      # Set the culprit (displayed as sub-header of issues on Sentry)
+      culprit:
+      # Set the logger (displayed after the sub-header of issues on Sentry)
+      logger:
+      # Set the release (displayed as tag and each version is displayed in the releases tab, version of ErrorSink by default)
+      release:
+      # Set the platform (displayed as tag)
+      platform:
 
-#breadcrumbs:
-#  # Maximum number of entries that can appear in the breadcrumb
-#  # Sentry does not advice to use more than 100, and reports exceeding limits might get dropped
-#  maximumEntries: 50
-#
-#  rules:
-#    ALL:
-#      # Regex to match breadcrumbs (single or list)
-#      match:
-#      # Drop this matching entry
-#      drop: false
-#      # Type of the breadcrumb entry (determines the icon on Sentry)
-#      # Current useful values: default, debug, user, location, http (hides message), navigation
-#      type: "default"
-#      # Category of the breadcrumb (text shown at the start of the breadcrumb, around 16 characters maximum length)
-#      category: " "
-#      # error, warning, info, debug, default
-#      level: "default"
+breadcrumbs:
+  # Maximum number of entries that can appear in the breadcrumb
+  # Sentry does not advice to use more than 100, and reports exceeding limits might get dropped
+  maximumEntries: 50
+
+  # Filter breadcrumb entries
+  filters:
+
+  # Change the appearance and data of breadcrumbs
+  rules:
+    ###### Options for breadcrumb rules
+    #  # Type of the breadcrumb entry (determines the icon on Sentry)
+    #  # Current useful values: default, debug, user, location, http (hides message), navigation
+    #  type: "default"
+    #  # Category of the breadcrumb (text shown at the start of the breadcrumb, around 16 characters maximum length)
+    #  category: " "
+    #  # Level, determining icon of the breadcrum: critical, error, warning, info, debug
+    #  level: "error"
+    #  # Change the message
+    #  message: "abc"
+    #  # Add extra data to the breadcrumb
+    #  data:
+    #    Planet: "Earth"
+
+    # Show logins as navigation
+    login:
+      matchMessage: " logged in with entity id " # Should capture: username[/123.123.123.123:1234] logged in with entity id 123 at ([world]-123.456, 123.0, 123.456)
+      category: ">>>"
+      type: "navigation"
+    # Show logouts as navigation
+    logout:
+      matchMessage: " lost connection: "
+      category: "<<<"
+      type: "navigation"
+    # Show commands as user acvitiy
+    commands:
+      matchMessage: " issued server command: "
+      category: "Command"
+      type: "navigation" # Change to 'user' when new version of Raven-Java is released
+    # Don't show console commands as user activity (revert previous rule)
+    consoleCommands:
+      matchMessage: "CONSOLE issued server command:"
+      category: " "
+      type: "default"
+
 
 # Print debug messages to the console
 debug: false

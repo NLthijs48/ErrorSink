@@ -4,15 +4,15 @@ import com.getsentry.raven.event.Breadcrumb;
 import com.getsentry.raven.event.BreadcrumbBuilder;
 import com.getsentry.raven.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import me.wiefferink.errorsink.tools.Log;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Breadcrumbs extends EventEditor {
@@ -22,15 +22,38 @@ public class Breadcrumbs extends EventEditor {
 	private Pattern tagPrefix = Pattern.compile("^\\[[a-zA-Z0-9-_]+\\] ");
 	private Logger logger;
 	private Appender breadcrumbAppender;
+	private ConfigurationSection rules;
+	private ConfigurationSection filters;
 
 	public Breadcrumbs(Logger logger) {
 		this.logger = logger;
+		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("breadcrumbs.rules");
+		filters = ErrorSink.getInstance().getConfig().getConfigurationSection("breadcrumbs.filters");
 		maximumEntries = ErrorSink.getInstance().getConfig().getInt("breadcrumbs.maximumEntries", 50);
+
 		breadcrumbAppender = new AbstractAppender("Breadcrumb Builder", null, null, false) {
 			@Override
-			public void append(LogEvent logEvent) {
+			public void append(LogEvent event) {
+				String formattedMessage = null;
+				if (event.getMessage() != null) {
+					formattedMessage = event.getMessage().getFormattedMessage();
+				}
+				if (filters != null) {
+					for (String filterKey : filters.getKeys(false)) {
+						if (ErrorSink.getInstance().match(
+								"breadcrumbs.filters." + filterKey,
+								formattedMessage,
+								event.getLevel(),
+								event.getThrown(),
+								event.getThreadName(),
+								event.getLoggerName())) {
+							return;
+						}
+					}
+				}
+
 				synchronized(breadcrumbs) {
-					breadcrumbs.add(logEvent);
+					breadcrumbs.add(event);
 					if(breadcrumbs.size() > maximumEntries) {
 						breadcrumbs.removeFirst();
 					}
@@ -44,46 +67,95 @@ public class Breadcrumbs extends EventEditor {
 	@Override
 	public void processEvent(EventBuilder eventBuilder, LogEvent event) {
 		List<Breadcrumb> result = new ArrayList<>();
-		synchronized(breadcrumbs) {
-			for(LogEvent logEvent : breadcrumbs) {
-				BreadcrumbBuilder builder = new BreadcrumbBuilder();
+		List<LogEvent> breadcrumbsCopy = new ArrayList<>(breadcrumbs);
+		for (LogEvent breadcrumbEvent : breadcrumbsCopy) {
+			BreadcrumbBuilder breadcrumb = new BreadcrumbBuilder();
 
-				builder.setTimestamp(new Date(logEvent.getMillis()));
-				builder.setLevel(getBreadcrumbLevel(logEvent));
-
-				// Match tags in the front of the message and set that as category instead
-				builder.setCategory(" "); // Empty to indicate regular logging
-				builder.setType(Breadcrumb.Type.DEFAULT);
-				String message = logEvent.getMessage().getFormattedMessage();
-				Matcher matcher = tagPrefix.matcher(message);
-				if(matcher.find()) {
-					message = message.substring(matcher.group().length());
-					builder.setCategory(matcher.group().substring(1, matcher.group().length() - 2));
-				} else if(message.contains(" lost connection: ")) {
-					builder.setCategory("<<<");
-					builder.setType(Breadcrumb.Type.NAVIGATION);
-				} else if (message.contains(" logged in with entity id ")) {
-					builder.setCategory(">>>");
-					builder.setType(Breadcrumb.Type.NAVIGATION);
-				} else if (message.contains(" issued server command: ") && !message.contains("CONSOLE issued server command: ")) {
-					builder.setCategory("Command");
-					// TODO change to Type.USER if/when pull request is accepted
-					builder.setType(Breadcrumb.Type.NAVIGATION);
-				} else if (logEvent.getThreadName().contains("Chat Thread")) {
-					builder.setCategory("Chat");
-					// TODO change to Type.USER if/when pull request is accepted
-					builder.setType(Breadcrumb.Type.NAVIGATION);
-				}
-				builder.setMessage(message);
-
-				Map<String, String> data = new HashMap<>();
-				if(logEvent.getThrown() != null) {
-					data.put("exception", ExceptionUtils.getStackTrace(logEvent.getThrown()));
-				}
-				builder.setData(data);
-
-				result.add(builder.build());
+			String message = null;
+			if (breadcrumbEvent.getMessage() != null) {
+				message = breadcrumbEvent.getMessage().getFormattedMessage();
 			}
+
+			// Default to empty message to prevent Raven error
+			if (message == null) {
+				breadcrumb.setMessage("");
+			} else {
+				breadcrumb.setMessage(message);
+			}
+
+			// Set defaults
+			breadcrumb.setTimestamp(new Date(breadcrumbEvent.getMillis()));
+			breadcrumb.setLevel(getBreadcrumbLevel(breadcrumbEvent));
+
+			// Match tags in the front of the message and set that as category instead
+			breadcrumb.setCategory(" "); // Empty to indicate regular logging
+			breadcrumb.setType(Breadcrumb.Type.DEFAULT);
+
+			if (rules != null) {
+				Map<String, String> data = new HashMap<>();
+				for (String ruleKey : rules.getKeys(false)) {
+					if (!ErrorSink.getInstance().match(
+							"breadcrumbs.rules." + ruleKey,
+							message,
+							breadcrumbEvent.getLevel(),
+							breadcrumbEvent.getThrown(),
+							breadcrumbEvent.getThreadName(),
+							breadcrumbEvent.getLoggerName())) {
+						continue;
+					}
+
+					// Category
+					String category = rules.getString(ruleKey + ".category");
+					if (category != null) {
+						breadcrumb.setCategory(category);
+					}
+
+					// Type
+					String typeString = rules.getString(ruleKey + ".type");
+					if (typeString != null) {
+						try {
+							breadcrumb.setType(Breadcrumb.Type.valueOf(typeString.toUpperCase()));
+						} catch (IllegalArgumentException e) {
+							Log.error("Incorrect breadcrumb type \"" + typeString + "\" for rule", rules.getCurrentPath() + "." + ruleKey);
+						}
+					}
+
+					// Message
+					String newMessage = rules.getString(ruleKey + ".message");
+					if (newMessage != null) {
+						breadcrumb.setMessage(newMessage);
+					}
+
+					// Level
+					String levelString = rules.getString(ruleKey + ".level");
+					if (levelString != null) {
+						try {
+							breadcrumb.setLevel(Breadcrumb.Level.valueOf(levelString.toUpperCase()));
+						} catch (IllegalArgumentException e) {
+							Log.warn("Incorrect breadcrumb level \"" + levelString + "\" for rule", rules.getCurrentPath() + "." + ruleKey);
+						}
+					}
+
+					// Add data
+					ConfigurationSection dataSection = rules.getConfigurationSection(ruleKey + ".data");
+					if (dataSection != null) {
+						for (String dataKey : dataSection.getKeys(false)) {
+							// Sentry only supports string values, but we support lists and thing like that this way
+							Object dataValue = getValue(dataSection, dataKey);
+							if (dataValue != null) {
+								data.put(dataKey, dataValue.toString());
+							}
+						}
+					}
+				}
+
+				// Set data (merging data from all rules)
+				if (!data.isEmpty()) {
+					breadcrumb.setData(data);
+				}
+			}
+
+			result.add(breadcrumb.build());
 		}
 		eventBuilder.withBreadcrumbs(result);
 	}

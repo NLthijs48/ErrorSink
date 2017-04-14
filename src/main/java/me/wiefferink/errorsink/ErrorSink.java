@@ -48,7 +48,7 @@ public class ErrorSink extends JavaPlugin {
 			return;
 		}
 
-		List<String> matchSectionNames = Arrays.asList("filterRules", "eventRules");
+		List<String> matchSectionNames = Arrays.asList("events.filters", "events.rules", "breadcrumbs.filters", "breadcrumbs.rules");
 		matcherMap = new HashMap<>();
 		for (String matchSectionName : matchSectionNames) {
 			ConfigurationSection matchSection = getConfig().getConfigurationSection(matchSectionName);
@@ -129,6 +129,11 @@ public class ErrorSink extends JavaPlugin {
 		if(serverName == null || serverName.isEmpty()) {
 			serverName = Bukkit.getServerName();
 		}
+
+		// Server name can never be null/empty, this will cause Raven to lookup the hostname and kills the server somehow
+		if (serverName == null || serverName.isEmpty()) {
+			serverName = "ServerName";
+		}
 		return serverName;
 	}
 
@@ -149,14 +154,14 @@ public class ErrorSink extends JavaPlugin {
 	}
 
 
-	public boolean match(String matcherPath, String message, Level level, Throwable throwable) {
+	public boolean match(String matcherPath, String message, Level level, Throwable throwable, String threadName, String loggerName) {
 		EventRuleMatcher matcher = matcherMap.get(matcherPath);
 		if(matcher == null) {
 			Log.error("Trying to match path", matcherPath, "but there is no EventRuleMatcher!");
 			return false;
 		}
 
-		return matcher.matches(message, level, throwable);
+		return matcher.matches(message, level, throwable, threadName, loggerName);
 	}
 
 

@@ -10,8 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class RuleData extends EventEditor {
 
@@ -24,7 +22,7 @@ public class RuleData extends EventEditor {
 		if(bukkitVersion.endsWith("-SNAPSHOT")) {
 			bukkitVersion = bukkitVersion.substring(0, bukkitVersion.lastIndexOf("-SNAPSHOT"));
 		}
-		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("eventRules");
+		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("events.rules");
 	}
 
 	@Override
@@ -41,14 +39,20 @@ public class RuleData extends EventEditor {
 
 		// Config rules
 		if(rules != null) {
+			String formattedMessage = null;
+			if (event.getMessage() != null) {
+				formattedMessage = event.getMessage().getFormattedMessage();
+			}
 			for(String ruleKey : rules.getKeys(false)) {
-				// Skip rules that are dropping events (if it would be a match, the event would not get here)
-				if(rules.getBoolean(ruleKey + ".drop")) {
-					continue;
-				}
 
 				// Match event
-				if(!ErrorSink.getInstance().match("eventRules." + ruleKey, event.getMessage().getFormattedMessage(), event.getLevel(), event.getThrown())) {
+				if (!ErrorSink.getInstance().match(
+						"events.rules." + ruleKey,
+						formattedMessage,
+						event.getLevel(),
+						event.getThrown(),
+						event.getThreadName(),
+						event.getLoggerName())) {
 					continue;
 				}
 
@@ -84,7 +88,7 @@ public class RuleData extends EventEditor {
 				String levelString = rules.getString(ruleKey + ".level");
 				if (levelString != null) {
 					try {
-						eventBuilder.withLevel(Event.Level.valueOf(levelString));
+						eventBuilder.withLevel(Event.Level.valueOf(levelString.toUpperCase()));
 					} catch (IllegalArgumentException e) {
 						Log.warn("Incorrect level \"" + levelString + "\" for rule", rules.getCurrentPath() + "." + ruleKey);
 					}
@@ -123,35 +127,6 @@ public class RuleData extends EventEditor {
 			}
 		}
 
-	}
-
-	/**
-	 * Deep get a Map/value structure from a ConfigurationSection
-	 * @param source The source ConfigurationSection
-	 * @param path   The path to get data from
-	 * @return Value, List, Map, or null if nothing
-	 */
-	private Object getValue(ConfigurationSection source, String path) {
-		if(source.isList(path)) {
-			return source.getList(path, null);
-		} else if(source.isConfigurationSection(path)) {
-			ConfigurationSection child = source.getConfigurationSection(path);
-			if(child != null) {
-				SortedMap<String, Object> childMap = new TreeMap<>();
-				for(String childKey : child.getKeys(false)) {
-					Object childValue = getValue(child, childKey);
-					if(childValue != null) {
-						childMap.put(childKey, childValue);
-					}
-				}
-				if(!childMap.isEmpty()) {
-					return childMap;
-				}
-			}
-		} else {
-			return source.getString(path, null);
-		}
-		return null;
 	}
 
 }
