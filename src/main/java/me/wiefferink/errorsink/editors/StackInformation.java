@@ -1,7 +1,6 @@
 package me.wiefferink.errorsink.editors;
 
 import com.getsentry.raven.event.EventBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class StackInformation extends EventEditor {
 
 	@Override
 	public void processEvent(EventBuilder eventBuilder, LogEvent event) {
-		List<String> result = new ArrayList<>();
+		StringBuilder result = new StringBuilder();
 
 		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 		// Filter StackTraceElements
@@ -71,13 +70,19 @@ public class StackInformation extends EventEditor {
 		}
 
 		// Build breadcrumb data
-		for(int i = filteredElements.size() - 1; i >= 0; i--) {
-			StackTraceElement element = filteredElements.get(i);
-			result.add(
-					element.getClassName() + "." + element.getMethodName() + "(" + element.getFileName() + ":" + element.getLineNumber() + ")"
-			);
+		for (StackTraceElement element : filteredElements) {
+			result
+					.append(element.getClassName())
+					.append(".")
+					.append(element.getMethodName())
+					.append("(")
+					.append(element.getFileName())
+					.append(":")
+					.append(element.getLineNumber())
+					.append(")")
+					.append("\n");
 		}
 
-		eventBuilder.withExtra("Stack", StringUtils.join(result, "\n"));
+		eventBuilder.withExtra("Stack", result.toString());
 	}
 }
