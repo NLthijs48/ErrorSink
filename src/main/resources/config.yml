@@ -115,7 +115,7 @@ breadcrumbs:
     commands:
       matchMessage: " issued server command: "
       category: "Command"
-      type: "navigation" # Change to 'user' when new version of Raven-Java is released
+      type: "user"
     # Don't show console commands as user activity (revert previous rule)
     consoleCommands:
       matchMessage: "CONSOLE issued server command:"
@@ -126,6 +126,11 @@ breadcrumbs:
       matchMessage: "^\\[(?<plugin>[a-zA-Z0-9-_]+)\\] (?<message>.*)$"
       category: "{plugin}"
       message: "{message}"
+    # Chat as user activity
+    chat:
+      matchThreadName: "Chat Thread"
+      category: "Chat"
+      type: "user"
 
 
 # Print debug messages to the console
