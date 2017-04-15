@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
+import java.util.Map;
 
 public class RuleData extends EventEditor {
 
@@ -44,48 +45,54 @@ public class RuleData extends EventEditor {
 				formattedMessage = event.getMessage().getFormattedMessage();
 			}
 			for(String ruleKey : rules.getKeys(false)) {
+				ConfigurationSection rule = rules.getConfigurationSection(ruleKey);
+				if(rule == null) {
+					continue;
+				}
 
 				// Match event
-				if (!ErrorSink.getInstance().match(
+				Map<String, String> replacements = ErrorSink.getInstance().match(
 						"events.rules." + ruleKey,
 						formattedMessage,
 						event.getLevel(),
 						event.getThrown(),
 						event.getThreadName(),
-						event.getLoggerName())) {
+						event.getLoggerName()
+				);
+				if(replacements == null) {
 					continue;
 				}
 
 				// Add tags
-				ConfigurationSection tagsSection = rules.getConfigurationSection(ruleKey + ".tags");
+				ConfigurationSection tagsSection = rule.getConfigurationSection("tags");
 				if(tagsSection != null) {
 					for(String tagKey : tagsSection.getKeys(false)) {
-						String tagValue = tagsSection.getString(tagKey);
+						String tagValue = applyReplacements(tagsSection.getString(tagKey), replacements);
 						if(tagValue != null && !tagValue.isEmpty()) {
-							eventBuilder.withTag(tagKey, tagValue);
+							eventBuilder.withTag(applyReplacements(tagKey, replacements), tagValue);
 						}
 					}
 				}
 
 				// Add data
-				ConfigurationSection dataSection = rules.getConfigurationSection(ruleKey + ".data");
+				ConfigurationSection dataSection = rule.getConfigurationSection("data");
 				if(dataSection != null) {
 					for(String datakey : dataSection.getKeys(false)) {
-						Object dataValue = getValue(dataSection, datakey);
+						Object dataValue = getValue(dataSection, datakey, replacements);
 						if(dataValue != null) {
-							eventBuilder.withExtra(datakey, dataValue);
+							eventBuilder.withExtra(applyReplacements(datakey, replacements), dataValue);
 						}
 					}
 				}
 
 				// Fingerprint
-				List<String> fingerPrint = Utils.singleOrList(rules, ruleKey + ".fingerprint");
+				List<String> fingerPrint = applyReplacements(Utils.singleOrList(rule, "fingerprint"), replacements);
 				if(fingerPrint != null) {
 					eventBuilder.withFingerprint(fingerPrint);
 				}
 
 				// Level
-				String levelString = rules.getString(ruleKey + ".level");
+				String levelString = applyReplacements(rule.getString("level"), replacements);
 				if (levelString != null) {
 					try {
 						eventBuilder.withLevel(Event.Level.valueOf(levelString.toUpperCase()));
@@ -95,31 +102,31 @@ public class RuleData extends EventEditor {
 				}
 
 				// Environment
-				String environment = rules.getString(ruleKey + ".environment");
+				String environment = applyReplacements(rule.getString("environment"), replacements);
 				if (environment != null) {
 					eventBuilder.withEnvironment(environment);
 				}
 
 				// Culprit
-				String culprit = rules.getString(ruleKey + ".culprit");
+				String culprit = applyReplacements(rule.getString("culprit"), replacements);
 				if (culprit != null) {
 					eventBuilder.withCulprit(culprit);
 				}
 
 				// Logger
-				String logger = rules.getString(ruleKey + ".logger");
+				String logger = applyReplacements(rule.getString("logger"), replacements);
 				if (logger != null) {
 					eventBuilder.withLogger(logger);
 				}
 
 				// Release
-				String release = rules.getString(ruleKey + ".release");
+				String release = applyReplacements(rule.getString("release"), replacements);
 				if (release != null) {
 					eventBuilder.withRelease(release);
 				}
 
 				// Platform
-				String platform = rules.getString(ruleKey + ".platform");
+				String platform = applyReplacements(rule.getString("platform"), replacements);
 				if (platform != null) {
 					eventBuilder.withPlatform(platform);
 				}

@@ -153,12 +153,22 @@ public class ErrorSink extends JavaPlugin {
 		return raven;
 	}
 
-
-	public boolean match(String matcherPath, String message, Level level, Throwable throwable, String threadName, String loggerName) {
+	/**
+	 * Match a rule to an event
+	 *
+	 * @param matcherPath The path of the matcher rules to use
+	 * @param message     The message to match
+	 * @param level       The level to match
+	 * @param throwable   The exception to match
+	 * @param threadName  The thread name to match
+	 * @param loggerName  The logger name to match
+	 * @return A map with the captured groups if a match is found, otherwise null
+	 */
+	public Map<String, String> match(String matcherPath, String message, Level level, Throwable throwable, String threadName, String loggerName) {
 		EventRuleMatcher matcher = matcherMap.get(matcherPath);
 		if(matcher == null) {
 			Log.error("Trying to match path", matcherPath, "but there is no EventRuleMatcher!");
-			return false;
+			return null;
 		}
 
 		return matcher.matches(message, level, throwable, threadName, loggerName);

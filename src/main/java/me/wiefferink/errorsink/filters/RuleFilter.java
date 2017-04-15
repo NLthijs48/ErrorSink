@@ -32,24 +32,24 @@ public class RuleFilter extends AbstractFilter {
 	 */
 	private Filter.Result process(String message, Level level, Throwable throwable, String threadName, String loggerName) {
 		try {
-			if (rules == null) {
+			if(rules == null) {
 				return onMismatch;
 			}
 
 			// Match all rules
-			for (String ruleKey : rules.getKeys(false)) {
+			for(String ruleKey : rules.getKeys(false)) {
 				// Match event
-				if (ErrorSink.getInstance().match(
+				if(ErrorSink.getInstance().match(
 						"events.filters." + ruleKey,
 						message,
 						level,
 						throwable,
 						threadName,
-						loggerName)) {
+						loggerName) != null) {
 					return onMatch;
 				}
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 			// Causing exceptions within a filter will crash the server, therefore we catch everything
 			Log.error("Filter failed to execute rules:", ExceptionUtils.getStackTrace(e));
 		}
@@ -92,7 +92,7 @@ public class RuleFilter extends AbstractFilter {
 
 	@Override
 	public Filter.Result filter(LogEvent logEvent) {
-		if (logEvent == null) {
+		if(logEvent == null) {
 			return onMismatch;
 		}
 		return process(

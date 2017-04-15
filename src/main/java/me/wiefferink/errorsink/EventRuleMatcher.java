@@ -8,13 +8,18 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class EventRuleMatcher {
+
+	private static final Pattern NAMED_GROUPS = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
 
 	private Set<Integer> levelMatches;
 	private List<Pattern> messagePatterns;
@@ -75,12 +80,12 @@ public class EventRuleMatcher {
 	private List<Pattern> getRegexPatterns(ConfigurationSection section, String path) {
 		List<Pattern> result = null;
 		List<String> regexes = Utils.singleOrList(criteria, path);
-		if (regexes != null) {
+		if(regexes != null) {
 			result = new ArrayList<>();
-			for (String regex : regexes) {
+			for(String regex : regexes) {
 				try {
 					result.add(Pattern.compile(regex));
-				} catch (PatternSyntaxException e) {
+				} catch(PatternSyntaxException e) {
 					Log.warn("Incorrect exception regex \"" + regex + "\" at", criteria.getCurrentPath() + "." + path + ":", ExceptionUtils.getStackTrace(e));
 				}
 			}
@@ -95,13 +100,28 @@ public class EventRuleMatcher {
 	 * @param patterns The patterns to match
 	 * @return true if one of the patterns matches, otherwise false
 	 */
-	private boolean matchesAny(String input, List<Pattern> patterns) {
-		if (input == null || patterns == null) {
+	private boolean matchesAny(String input, List<Pattern> patterns, Map<String, String> replacements) {
+		if(input == null || patterns == null) {
 			return false;
 		}
 
-		for (Pattern messagePattern : patterns) {
-			if (messagePattern.matcher(input).find()) {
+		for(Pattern pattern : patterns) {
+			Matcher matcher = pattern.matcher(input);
+			if(matcher.find()) {
+				// Collect named matcher groups
+				Matcher groupMatcher = NAMED_GROUPS.matcher(pattern.pattern());
+				while(groupMatcher.find()) {
+					try {
+						replacements.put(groupMatcher.group(1), matcher.group(groupMatcher.group(1)));
+					} catch(IllegalArgumentException ignored) {
+
+					}
+				}
+
+				// Collect numbered matcher groups
+				for(int groupIndex = 1; groupIndex <= matcher.groupCount(); groupIndex++) {
+					replacements.put(groupIndex + "", matcher.group(groupIndex));
+				}
 				return true;
 			}
 		}
@@ -109,42 +129,43 @@ public class EventRuleMatcher {
 	}
 
 	/**
-	 * Check if details of an event match this matcher
-	 * @param message   The message of the event
-	 * @param level     The level of the event
-	 * @param throwable The Throwable of the event
-	 * @param threadName The name of the thread to match
-	 * @param loggerName The name of the logger to match
-	 * @return true if the event matches this rule, otherwise false
+	 * Match a rule to an event
+	 * @param message     The message to match
+	 * @param level       The level to match
+	 * @param throwable   The exception to match
+	 * @param threadName  The thread name to match
+	 * @param loggerName  The logger name to match
+	 * @return A map with the captured groups if a match is found, otherwise null
 	 */
-	public boolean matches(String message, Level level, Throwable throwable, String threadName, String loggerName) {
+	public Map<String, String> matches(String message, Level level, Throwable throwable, String threadName, String loggerName) {
+		Map<String, String> groups = new HashMap<>();
 
 		// Level match
 		if(levelMatches != null && !levelMatches.contains(level.intLevel())) {
-			return false;
+			return null;
 		}
 
 		// Message match
-		if (messagePatterns != null && !matchesAny(message, messagePatterns)) {
-			return false;
+		if(messagePatterns != null && !matchesAny(message, messagePatterns, groups)) {
+			return null;
 		}
 
 		// Exception match
-		if (exceptionPatterns != null && throwable != null && !matchesAny(ExceptionUtils.getStackTrace(throwable), exceptionPatterns)) {
-			return false;
+		if(exceptionPatterns != null && throwable != null && !matchesAny(ExceptionUtils.getStackTrace(throwable), exceptionPatterns, groups)) {
+			return null;
 		}
 
 		// Thread name match
-		if (threadPatterns != null && !matchesAny(threadName, threadPatterns)) {
-			return false;
+		if(threadPatterns != null && !matchesAny(threadName, threadPatterns, groups)) {
+			return null;
 		}
 
 		// Logger name match
-		if (loggerNamePatterns != null && !matchesAny(loggerName, loggerNamePatterns)) {
-			return false;
+		if(loggerNamePatterns != null && !matchesAny(loggerName, loggerNamePatterns, groups)) {
+			return null;
 		}
 
-		return true;
+		return groups;
 	}
 
 	@Override

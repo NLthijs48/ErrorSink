@@ -121,6 +121,11 @@ breadcrumbs:
       matchMessage: "CONSOLE issued server command:"
       category: " "
       type: "default"
+    # Plugin name as category
+    category:
+      matchMessage: "^\\[(?<plugin>[a-zA-Z0-9-_]+)\\] (?<message>.*)$"
+      category: "{plugin}"
+      message: "{message}"
 
 
 # Print debug messages to the console
