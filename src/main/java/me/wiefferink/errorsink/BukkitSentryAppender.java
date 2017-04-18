@@ -96,7 +96,7 @@ public class BukkitSentryAppender extends SentryAppender {
 			eventBuilder.withEnvironment(environment.trim());
 		}
 
-		if(!eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
+		if (eventMessage.getFormattedMessage() != null && !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
 			eventBuilder.withSentryInterface(new MessageInterface(
 					eventMessage.getFormat(),
 					formatMessageParameters(eventMessage.getParameters()),
