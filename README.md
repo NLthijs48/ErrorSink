@@ -1,12 +1,9 @@
 # ErrorSink
-Spigot plugin to send all warnings and errors to Sentry.io
-
-After installing the plugin create an account on Sentry.io, create a project, got to the setting of the project and copy the DSN (Client Keys).
-Start your server to generate a default config, after this put the DSN into the config and set your servername.
-Now restart your server and the ErrorSink plugin should not have any errors/warnings anymore.
-
-If any plugin produces an error or warning it should show up in Sentry.
-You might want to disable data scrubbing in the Sentry project settings, because otherwise all ips are stripped from the messages.
+Spigot plugin to send all warnings and errors to Sentry.io:
+* Easily see all issues on your server in a beautiful web interface.
+* Get email notification for new (and returned) issues.
+* Detailed reports of issues so that plugin developers can easily fix them.
+* Lots of configuration options to filter and change events.
 
 ## Information
 * **Build server:** http://jenkins.wiefferink.me/job/ErrorSink/
@@ -31,3 +28,9 @@ You might want to disable data scrubbing in the Sentry project settings, because
     1. Restart/reload your server.
 1. Setup complete, ErrorSink will now send all errors and warnings to the web interface. You probably already have an event in the web interface of Sentry which you can check out.
 1. If you have spammy events of plugins you cannot fix or want to change the collected data you can use the `config.yml` file to adapt ErrorSink. The free version of Sentry has a limit of 10000 events per month, so filtering spammy warnings/errors is recommended.
+
+## Frequently Asked Questions
+1. Why are messages with ips not shown in Sentry?
+    * By default Sentry has some data scrubbers enabled, you can turn them off in the `Project Settings`:
+        * Disable `Data Scrubber`
+        * Disable `Use Default Scrubbers`
