@@ -29,6 +29,11 @@ Spigot plugin to send all warnings and errors to Sentry.io:
 1. Setup complete, ErrorSink will now send all errors and warnings to the web interface. You probably already have an event in the web interface of Sentry which you can check out.
 1. If you have spammy events of plugins you cannot fix or want to change the collected data you can use the `config.yml` file to adapt ErrorSink. The free version of Sentry has a limit of 10000 events per month, so filtering spammy warnings/errors is recommended.
 
+## Example issue
+Overview of an issue as shown on the web interface of Sentry (everything between the start of the Details tab and the tags section is in a right sidebar when the screen is wider).
+
+![Example issue](images/issue.png)
+
 ## Frequently Asked Questions
 1. Why are messages with ips not shown in Sentry?
     * By default Sentry has some data scrubbers enabled, you can turn them off in the `Project Settings`:
