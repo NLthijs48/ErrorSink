@@ -144,6 +144,7 @@ public class BukkitSentryAppender extends SentryAppender {
 		}
 
 		Log.debug("Sending event to sentry:", eventBuilder);
+		ErrorSink.getInstance().increaseMessageSent();
 		return eventBuilder.build();
 	}
 }

@@ -20,6 +20,10 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>bstats-repo</id>
+            <url>http://repo.bstats.org/content/repositories/releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -45,6 +49,13 @@
             <groupId>com.getsentry.raven</groupId>
             <artifactId>raven-log4j2</artifactId>
             <version>8.0.2</version>
+        </dependency>
+
+        <!-- Bstats -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>1.1</version>
         </dependency>
 
     </dependencies>
@@ -175,6 +186,11 @@
                         <relocation>
                             <pattern>com.getsentry</pattern>
                             <shadedPattern>me.wiefferink.errorsink.shaded.sentry</shadedPattern>
+                        </relocation>
+                        <!-- Relocate bstats -->
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>me.wiefferink.errorsink.shaded.bstats</shadedPattern>
                         </relocation>
                     </relocations>
                     <artifactSet>

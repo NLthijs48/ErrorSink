@@ -10,6 +10,7 @@ import me.wiefferink.errorsink.editors.RuleData;
 import me.wiefferink.errorsink.editors.StackInformation;
 import me.wiefferink.errorsink.filters.ErrorSinkFilter;
 import me.wiefferink.errorsink.filters.RuleFilter;
+import me.wiefferink.errorsink.tools.Analytics;
 import me.wiefferink.errorsink.tools.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
@@ -34,6 +35,7 @@ public class ErrorSink extends JavaPlugin {
 	private Raven raven;
 	private BukkitSentryAppender appender;
 	private Map<String, EventRuleMatcher> matcherMap;
+	private int messagesSent = 0;
 
 	@Override
 	public void onEnable() {
@@ -60,6 +62,7 @@ public class ErrorSink extends JavaPlugin {
 		}
 
 		startCollecting(dsn);
+		Analytics.start();
 	}
 
 	@Override
@@ -77,6 +80,24 @@ public class ErrorSink extends JavaPlugin {
 	 */
 	public static ErrorSink getInstance() {
 		return instance;
+	}
+
+	/**
+	 * Add a message sent
+	 */
+	public void increaseMessageSent() {
+		messagesSent++;
+	}
+
+	/**
+	 * Get the message count sent since last reset
+	 *
+	 * @return Messages sent since last reset
+	 */
+	public int getAndResetMessageSent() {
+		int result = messagesSent;
+		messagesSent = 0;
+		return result;
 	}
 
 	/**
