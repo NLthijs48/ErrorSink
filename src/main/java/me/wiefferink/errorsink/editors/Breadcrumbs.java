@@ -5,6 +5,7 @@ import com.getsentry.raven.event.BreadcrumbBuilder;
 import com.getsentry.raven.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
 import me.wiefferink.errorsink.tools.Log;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LogEvent;
@@ -93,9 +94,12 @@ public class Breadcrumbs extends EventEditor {
 			breadcrumb.setLevel(getBreadcrumbLevel(breadcrumbEvent));
 			breadcrumb.setCategory(" "); // Empty to indicate regular logging
 			breadcrumb.setType(Breadcrumb.Type.DEFAULT);
+			Map<String, String> data = new HashMap<>();
+			if(breadcrumbEvent.getThrown() != null) {
+				data.put("exception", ExceptionUtils.getStackTrace(breadcrumbEvent.getThrown()));
+			}
 
 			if(rules != null) {
-				Map<String, String> data = new HashMap<>();
 				for(String ruleKey : rules.getKeys(false)) {
 					ConfigurationSection rule = rules.getConfigurationSection(ruleKey);
 					if(rule == null) {
@@ -159,10 +163,10 @@ public class Breadcrumbs extends EventEditor {
 					}
 				}
 
-				// Set data (merging data from all rules)
-				if(!data.isEmpty()) {
-					breadcrumb.setData(data);
-				}
+			}
+			// Set data (merged data from all rules)
+			if(!data.isEmpty()) {
+				breadcrumb.setData(data);
 			}
 
 			result.add(breadcrumb.build());
