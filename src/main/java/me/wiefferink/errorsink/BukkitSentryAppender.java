@@ -5,6 +5,7 @@ import com.getsentry.raven.event.Event;
 import com.getsentry.raven.event.EventBuilder;
 import com.getsentry.raven.event.interfaces.ExceptionInterface;
 import com.getsentry.raven.event.interfaces.MessageInterface;
+import com.getsentry.raven.event.interfaces.SentryException;
 import com.getsentry.raven.log4j2.SentryAppender;
 import com.getsentry.raven.util.Util;
 import me.wiefferink.errorsink.editors.EventEditor;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
 
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -76,6 +78,7 @@ public class BukkitSentryAppender extends SentryAppender {
 	 */
 	@Override
 	protected Event buildEvent(LogEvent event) {
+		// Basics
 		Message eventMessage = event.getMessage();
 		EventBuilder eventBuilder = new EventBuilder()
 				.withTimestamp(new Date(event.getMillis())) // Changed event.getTimeMillis() to event.getMillis(), Minecraft uses log4j 2.0-beta9, Sentry builds with 2.5
@@ -84,36 +87,62 @@ public class BukkitSentryAppender extends SentryAppender {
 				.withLevel(formatLevel(event.getLevel()))
 				.withExtra(THREAD_NAME, event.getThreadName());
 
+		// Servername
 		if(!Util.isNullOrEmpty(serverName)) {
 			eventBuilder.withServerName(serverName.trim());
 		}
 
+		// Release version
 		if(!Util.isNullOrEmpty(release)) {
 			eventBuilder.withRelease(release.trim());
 		}
 
+		// Environment
 		if(!Util.isNullOrEmpty(environment)) {
 			eventBuilder.withEnvironment(environment.trim());
 		}
 
-		if (eventMessage.getFormattedMessage() != null && !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
+		// Message format (if message formatting is used)
+		if(eventMessage.getFormattedMessage() != null && !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
 			eventBuilder.withSentryInterface(new MessageInterface(
 					eventMessage.getFormat(),
 					formatMessageParameters(eventMessage.getParameters()),
 					eventMessage.getFormattedMessage()));
 		}
 
+		// Exception
 		Throwable throwable = event.getThrown();
 		if(throwable != null) {
-			eventBuilder.withSentryInterface(new ExceptionInterface(throwable));
+			Deque<SentryException> exceptionDeque = SentryException.extractExceptionQueue(throwable);
+			if(!exceptionDeque.isEmpty()) {
+				SentryException firstException = exceptionDeque.removeFirst();
+				if(firstException != null) {
+					// If message in exception is empty, use the log message
+					String exceptionMessage = firstException.getExceptionMessage();
+					if(exceptionMessage == null || exceptionMessage.isEmpty()) {
+						exceptionMessage = eventMessage.getFormattedMessage();
+					}
+					firstException = new SentryException(
+							exceptionMessage,
+							firstException.getExceptionClassName(),
+							firstException.getExceptionPackageName(),
+							firstException.getStackTraceInterface()
+					);
+					exceptionDeque.addFirst(firstException);
+				}
+			}
+			eventBuilder.withSentryInterface(new ExceptionInterface(exceptionDeque));
 		}
 
+		// Culprit
 		eventBuilder.withCulprit(event.getLoggerName());
 
+		// Log4j metadata
 		if(event.getContextStack() != null && !event.getContextStack().asList().isEmpty()) {
 			eventBuilder.withExtra(LOG4J_NDC, event.getContextStack().asList());
 		}
 
+		// Global context
 		if(event.getContextMap() != null) {
 			for(Map.Entry<String, String> contextEntry : event.getContextMap().entrySet()) {
 				if(extraTags.contains(contextEntry.getKey())) {
@@ -124,14 +153,17 @@ public class BukkitSentryAppender extends SentryAppender {
 			}
 		}
 
+		// Log4j marker
 		if(event.getMarker() != null) {
 			eventBuilder.withTag(LOG4J_MARKER, event.getMarker().getName());
 		}
 
+		// Global tags
 		for(Map.Entry<String, String> tagEntry : tags.entrySet()) {
 			eventBuilder.withTag(tagEntry.getKey(), tagEntry.getValue());
 		}
 
+		// Event builders registered in Raven
 		raven.runBuilderHelpers(eventBuilder);
 
 		// Run EventEditors
