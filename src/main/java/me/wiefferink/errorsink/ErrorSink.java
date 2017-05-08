@@ -25,9 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO implement shutdown method with cleanup
 // TODO try changing System.err logging to level error instead of warn?
-// TODO command to add breadcrubms?
 // TODO command to reload config?
 public class ErrorSink extends JavaPlugin {
 
@@ -37,8 +35,12 @@ public class ErrorSink extends JavaPlugin {
 	private Map<String, EventRuleMatcher> matcherMap;
 	private int messagesSent = 0;
 
-	@Override
-	public void onEnable() {
+	/**
+	 * Constructor
+	 * Collection is already enabled here instead of onEnable to also capture
+	 * loading bugs in other plugins (like missing dependencies)
+	 */
+	public ErrorSink() {
 		instance = this;
 		Log.setLogger(getLogger());
 		Log.setDebug(getConfig().getBoolean("debug"));
@@ -52,21 +54,26 @@ public class ErrorSink extends JavaPlugin {
 
 		List<String> matchSectionNames = Arrays.asList("events.filters", "events.rules", "breadcrumbs.filters", "breadcrumbs.rules");
 		matcherMap = new HashMap<>();
-		for (String matchSectionName : matchSectionNames) {
+		for(String matchSectionName : matchSectionNames) {
 			ConfigurationSection matchSection = getConfig().getConfigurationSection(matchSectionName);
-			if (matchSection != null) {
-				for (String eventRuleKey : matchSection.getKeys(false)) {
+			if(matchSection != null) {
+				for(String eventRuleKey : matchSection.getKeys(false)) {
 					matcherMap.put(matchSection.getCurrentPath() + "." + eventRuleKey, new EventRuleMatcher(matchSection.getConfigurationSection(eventRuleKey)));
 				}
 			}
 		}
 
 		startCollecting(dsn);
+	}
+
+	@Override
+	public void onEnable() {
 		Analytics.start();
 	}
 
 	@Override
 	public void onDisable() {
+		// Remove and shutdown appender to prevent double appenders because of disable/enable
 		Logger logger = (Logger)LogManager.getRootLogger();
 		if(appender != null) {
 			logger.removeAppender(appender);

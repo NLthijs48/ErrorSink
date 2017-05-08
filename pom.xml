@@ -44,11 +44,18 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Sentry.io -->
+        <!-- Raven-Java log4j2 bindings to send events to Sentry.io -->
         <dependency>
             <groupId>com.getsentry.raven</groupId>
             <artifactId>raven-log4j2</artifactId>
             <version>8.0.2</version>
+        </dependency>
+
+        <!-- Prevent Raven-Java warning about logging framework -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.21</version>
         </dependency>
 
         <!-- Bstats -->

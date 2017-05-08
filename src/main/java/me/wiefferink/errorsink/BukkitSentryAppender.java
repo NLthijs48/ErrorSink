@@ -43,7 +43,7 @@ public class BukkitSentryAppender extends SentryAppender {
 	}
 
 	/**
-	 * Shutdown this appender
+	 * Shutdown this appender and the used EventEditors
 	 */
 	public void shutdown() {
 		for(EventEditor editor : eventEditors) {
