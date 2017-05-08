@@ -10,6 +10,29 @@ dsn: ""
 # Defaults to the name specified in server.properties
 serverName: ""
 
+# MATCHING FOR RULES AND FILTERS:
+#   Each 'rules:' and 'filters:' subsection has options to match events,
+#   after this matching the event is dropped in case it is a filter,
+#   and the rules get applied in case of a rule.
+#   The following matching options can be used:
+#     # Level of the event should be in the provided list
+#     matchLevel: []
+#     # Message of the event should match one of the regexes
+#     matchMessage: []
+#     # Exception of the event should match one of the regexes
+#     matchException: []
+#     # Name of the thread sending the event should match one of the regexes
+#     matchThreadName: []
+#     # Logger name should match one of the regexes
+#     matchLoggerName: []
+#
+#   General notes:
+#     - Each 'match<>' rule should match for the event to match
+#     - Rules can either be a string, or a list of strings, of which only 1 needs to match
+#     - All matching options except 'matchLevel' are regexes
+
+
+# Filter and modify logging events (anything that is logged to latest.log is an event)
 events:
   # Drop events that match any of the rules (to filter out spam and false positives)
   filters:
@@ -34,52 +57,45 @@ events:
 
   # Add information to events and/or change their properties
   rules:
-    # Name of the rule
-    OPTIONS:
-      #### Which events should this rule apply to?
-      #### level, message and exception need to match, if one is unset it will match anything
-      # The level(s) to match: FATAL, ERROR, WARN, INFO, DEBUG, TRACE
-      matchLevel: []
-      # Regex(es) matching the message (string or list)
-      matchMessage: ""
-      # Regex(es) matching the exception (string or list)
-      matchException: ""
+    ###### Options for event rules
+    #  # Shown at the top of events in Sentry, can easily be used to filter and segment them
+    #  tags:
+    #    minigame: "Paintball"
+    # Data shown at the bottom of issues, cannot be filtered, but can provide detailed context
+    #  data:
+    #    Text: "A story"
+    #    Multiline-text: |
+    #      First line,
+    #      also important line
+    #    List: ["a", "b", "c"]
+    #    Complex:
+    #      A: "a"
+    #      B:
+    #        C: 123
+    #        D: ["d", "e"]
+    #  # String or array used to determine event grouping (events group together on an exact match)
+    #  fingerprint:
+    #  # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
+    #  level:
+    #  # Set the environment (displayed as tag), meant for 'production', 'development', etc.
+    #  environment:
+    #  # Set the culprit (displayed as sub-header of issues on Sentry)
+    #  culprit:
+    #  # Set the logger (displayed after the sub-header of issues on Sentry)
+    #  logger:
+    #  # Set the release (displayed as tag and each version is displayed in the releases tab, version of ErrorSink by default)
+    #  release:
+    #  # Set the platform (displayed as tag)
+    #  platform:
 
-       # Shown at the top of issues, can easiliy be used as filters
-      tags:
-        tag: "some text"
+    ruleName:
+      # Use the rule options here
 
-      # Data shown at the bottom of issues, cannot be filtered, but can provide detailed context
-      data:
-        Text: "A story"
-        Multiline-text: |
-          First line,
-          also important line
-        List: ["a", "b", "c"]
-        Complex:
-          A: "a"
-          B:
-            C: 123
-            D: ["d", "e"]
-
-      # String or array used to determine event grouping (events group together on an exact match)
-      fingerprint:
-      # Change the level of the event: FATAL, ERROR, WARNING, INFO, DEBUG
-      level:
-      # Set the environment (displayed as tag)
-      environment:
-      # Set the culprit (displayed as sub-header of issues on Sentry)
-      culprit:
-      # Set the logger (displayed after the sub-header of issues on Sentry)
-      logger:
-      # Set the release (displayed as tag and each version is displayed in the releases tab, version of ErrorSink by default)
-      release:
-      # Set the platform (displayed as tag)
-      platform:
-
+# Filter and change events when they are used as breadcrumb for events
+# Events on sentry will show a list of events leading up to the event, which are called breadcrumbs
 breadcrumbs:
   # Maximum number of entries that can appear in the breadcrumb
-  # Sentry does not advice to use more than 100, and reports exceeding limits might get dropped
+  # Sentry does not advice to use more than 100, and events exceeding the limits might get dropped
   maximumEntries: 50
 
   # Filter breadcrumb entries
