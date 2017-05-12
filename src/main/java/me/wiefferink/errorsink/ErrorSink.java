@@ -1,6 +1,5 @@
 package me.wiefferink.errorsink;
 
-import com.getsentry.raven.DefaultRavenFactory;
 import com.getsentry.raven.Raven;
 import com.getsentry.raven.RavenFactory;
 import com.getsentry.raven.dsn.InvalidDsnException;
@@ -12,12 +11,14 @@ import me.wiefferink.errorsink.filters.ErrorSinkFilter;
 import me.wiefferink.errorsink.filters.RuleFilter;
 import me.wiefferink.errorsink.tools.Analytics;
 import me.wiefferink.errorsink.tools.Log;
+import me.wiefferink.errorsink.tools.Utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
@@ -34,6 +35,7 @@ public class ErrorSink extends JavaPlugin {
 	private BukkitSentryAppender appender;
 	private Map<String, EventRuleMatcher> matcherMap;
 	private int messagesSent = 0;
+	private BukkitRavenFactory bukkitRavenFactory;
 
 	/**
 	 * Constructor
@@ -45,6 +47,10 @@ public class ErrorSink extends JavaPlugin {
 		Log.setLogger(getLogger());
 		Log.setDebug(getConfig().getBoolean("debug"));
 		saveDefaultConfig();
+
+		bukkitRavenFactory = new BukkitRavenFactory();
+		// Add factory, normally done automatically but we relocated the Sentry classes
+		RavenFactory.registerFactory(bukkitRavenFactory);
 
 		String dsn = getConfig().getString("dsn");
 		if(dsn == null || dsn.isEmpty()) {
@@ -68,6 +74,14 @@ public class ErrorSink extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		ErrorSink.getInstance().getServer().getPluginManager().registerEvents(bukkitRavenFactory, ErrorSink.getInstance());
+		// All plugins loaded now, update packages
+		bukkitRavenFactory.updateInAppFrames();
+		// Services should now be registered
+		Utils.run(bukkitRavenFactory::updateInAppFrames);
+		// Just to be sure
+		Utils.run(20L, bukkitRavenFactory::updateInAppFrames);
+
 		Analytics.start();
 	}
 
@@ -79,6 +93,8 @@ public class ErrorSink extends JavaPlugin {
 			logger.removeAppender(appender);
 			appender.shutdown();
 		}
+
+		HandlerList.unregisterAll(this);
 	}
 
 	/**
@@ -112,8 +128,6 @@ public class ErrorSink extends JavaPlugin {
 	 * @param dsn The Sentry DSN to use to send the events
 	 */
 	public void startCollecting(String dsn) {
-		// Add factory, normally done automatically but we relocated the Sentry classes
-		RavenFactory.registerFactory(new DefaultRavenFactory());
 		// Setup connection to Sentry.io
 		try {
 			raven = RavenFactory.ravenInstance(dsn);

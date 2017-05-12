@@ -1,6 +1,8 @@
 package me.wiefferink.errorsink.tools;
 
+import me.wiefferink.errorsink.ErrorSink;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,5 +31,26 @@ public class Utils {
 		return null;
 	}
 
+	public interface Run {
+		void run();
+	}
+
+	public static void run(Run task) {
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				task.run();
+			}
+		}.runTask(ErrorSink.getInstance());
+	}
+
+	public static void run(long delay, Run task) {
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				task.run();
+			}
+		}.runTaskLater(ErrorSink.getInstance(), delay);
+	}
 
 }
