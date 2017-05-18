@@ -10,7 +10,7 @@ import com.getsentry.raven.log4j2.SentryAppender;
 import com.getsentry.raven.util.Util;
 import me.wiefferink.errorsink.editors.EventEditor;
 import me.wiefferink.errorsink.tools.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
@@ -52,21 +52,20 @@ public class BukkitSentryAppender extends SentryAppender {
 	}
 
 	/**
-	 * Transforms a {@link Level} into an {@link Event.Level}.
-	 * @param level original level as defined in log4j2.
-	 * @return log level used within raven.
+	 * Convert a log4j2 level to an Event.Level
+	 * SentryAppender#formatLevel() is not used because Level#isMoreSpecificThan() does not exist in the log4j version of 1.11 and lower
+	 * @param level Level to convert
+	 * @return Event.Level from Raven-Java
 	 */
-	protected static Event.Level formatLevel(Level level) {
-		if(level.isAtLeastAsSpecificAs(Level.FATAL)) {
-			return Event.Level.FATAL;
-		} else if(level.isAtLeastAsSpecificAs(Level.ERROR)) {
-			return Event.Level.ERROR;
-		} else if(level.isAtLeastAsSpecificAs(Level.WARN)) {
+	public Event.Level levelToEventLevel(Level level) {
+		if(level.equals(Level.WARN)) {
 			return Event.Level.WARNING;
-		} else if(level.isAtLeastAsSpecificAs(Level.INFO)) {
-			return Event.Level.INFO;
-		} else {
+		} else if(level.equals(Level.ERROR) || level.equals(Level.FATAL)) {
+			return Event.Level.ERROR;
+		} else if(level.equals(Level.DEBUG)) {
 			return Event.Level.DEBUG;
+		} else {
+			return Event.Level.INFO;
 		}
 	}
 
@@ -81,10 +80,10 @@ public class BukkitSentryAppender extends SentryAppender {
 		// Basics
 		Message eventMessage = event.getMessage();
 		EventBuilder eventBuilder = new EventBuilder()
-				.withTimestamp(new Date(event.getMillis())) // Changed event.getTimeMillis() to event.getMillis(), Minecraft uses log4j 2.0-beta9, Sentry builds with 2.5
+				.withTimestamp(new Date(ErrorSink.getInstance().getTimeStamp(event)))
 				.withMessage(eventMessage.getFormattedMessage())
 				.withLogger(event.getLoggerName())
-				.withLevel(formatLevel(event.getLevel()))
+				.withLevel(levelToEventLevel(event.getLevel()))
 				.withExtra(THREAD_NAME, event.getThreadName());
 
 		// Servername

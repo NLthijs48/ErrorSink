@@ -2,7 +2,7 @@ package me.wiefferink.errorsink;
 
 import me.wiefferink.errorsink.tools.Log;
 import me.wiefferink.errorsink.tools.Utils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;

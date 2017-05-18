@@ -12,16 +12,20 @@ import me.wiefferink.errorsink.filters.RuleFilter;
 import me.wiefferink.errorsink.tools.Analytics;
 import me.wiefferink.errorsink.tools.Log;
 import me.wiefferink.errorsink.tools.Utils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,7 @@ public class ErrorSink extends JavaPlugin {
 	private Map<String, EventRuleMatcher> matcherMap;
 	private int messagesSent = 0;
 	private BukkitRavenFactory bukkitRavenFactory;
+	public static boolean hasOldLog4j2;
 
 	/**
 	 * Constructor
@@ -47,6 +52,19 @@ public class ErrorSink extends JavaPlugin {
 		Log.setLogger(getLogger());
 		Log.setDebug(getConfig().getBoolean("debug"));
 		saveDefaultConfig();
+
+		List<String> oldLogVersions = Arrays.asList("1.7", "1.8", "1.9", "1.10", "1.11");
+		for(String oldLogVersion : oldLogVersions) {
+			String version = Bukkit.getBukkitVersion();
+			// Detects '1.8', '1.8.3', '1.8-pre1' style versions
+			if(version.equals(oldLogVersion)
+					|| version.startsWith(oldLogVersion + ".")
+					|| version.startsWith(oldLogVersion + "-")) {
+				hasOldLog4j2 = true;
+				break;
+			}
+		}
+		Log.debug("Has old Log4j2:", hasOldLog4j2);
 
 		bukkitRavenFactory = new BukkitRavenFactory();
 		// Add factory, normally done automatically but we relocated the Sentry classes
@@ -216,5 +234,26 @@ public class ErrorSink extends JavaPlugin {
 		return matcher.matches(message, level, throwable, threadName, loggerName);
 	}
 
+	/**
+	 * Get the timestamp from a LogEvent
+	 * @param event LogEvent to get the timestamp from
+	 * @return Timestamp of the LogEvent
+	 */
+	public long getTimeStamp(LogEvent event) {
+		// Changed event.getTimeMillis() to event.getMillis(), Minecraft 1.11 and lower uses log4j 2.0-beta9, Sentry builds with 2.5
+		if(hasOldLog4j2) {
+			try {
+				Method method = event.getClass().getMethod("getMillis");
+				return (long) method.invoke(event);
+			} catch(NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				Log.debug("Failed to use getMillis on LogEvent:", ExceptionUtils.getStackFrames(e));
+				// Return something that is kind of close
+				return Calendar.getInstance().getTimeInMillis();
+			}
+		}
+
+		// Normal new log4j
+		return event.getTimeMillis();
+	}
 
 }

@@ -5,7 +5,7 @@ import com.getsentry.raven.event.BreadcrumbBuilder;
 import com.getsentry.raven.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
 import me.wiefferink.errorsink.tools.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LogEvent;
@@ -90,7 +90,7 @@ public class Breadcrumbs extends EventEditor {
 			}
 
 			// Set defaults
-			breadcrumb.setTimestamp(new Date(breadcrumbEvent.getMillis()));
+			breadcrumb.setTimestamp(new Date(ErrorSink.getInstance().getTimeStamp(breadcrumbEvent)));
 			breadcrumb.setLevel(getBreadcrumbLevel(breadcrumbEvent));
 			breadcrumb.setCategory(" "); // Empty to indicate regular logging
 			breadcrumb.setType(Breadcrumb.Type.DEFAULT);

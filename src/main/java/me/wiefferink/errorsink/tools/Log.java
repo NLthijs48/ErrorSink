@@ -1,6 +1,7 @@
 package me.wiefferink.errorsink.tools;
 
-import org.apache.commons.lang3.StringUtils;
+
+import org.apache.commons.lang.StringUtils;
 
 import java.util.logging.Logger;
 
