@@ -6,6 +6,7 @@ Spigot plugin to send all warnings and errors to Sentry.io:
 * Lots of configuration options to filter and change events.
 
 ## Information
+* **Spigot:** https://www.spigotmc.org/resources/errorsink.41090/
 * **Build server:** http://jenkins.wiefferink.me/job/ErrorSink/
 * **Javadocs:** https://wiefferink.me/ErrorSink/javadocs
 
