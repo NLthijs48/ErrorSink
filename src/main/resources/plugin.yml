@@ -1,4 +1,5 @@
 name: ErrorSink
+description: "Collect server errors and warnings in a beautiful web interface"
 main: me.wiefferink.errorsink.ErrorSink
 version: "${project.version}"
 author: NLThijs48
