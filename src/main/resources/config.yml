@@ -149,5 +149,9 @@ breadcrumbs:
       type: "user"
 
 
-# Print debug messages to the console
+# Enable sending stats to http://bstats.org/.
+# Providing these anonymous stats to me encourages me to continue development
+# because I get an idea about how many people use the plugin.
+sendStats: true
+# Print debug messages to the console.
 debug: false

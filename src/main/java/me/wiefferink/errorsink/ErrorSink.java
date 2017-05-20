@@ -100,7 +100,9 @@ public class ErrorSink extends JavaPlugin {
 		// Just to be sure
 		Utils.run(20L, bukkitRavenFactory::updateInAppFrames);
 
-		Analytics.start();
+		if(getConfig().getBoolean("sendStats")) {
+			Analytics.start();
+		}
 	}
 
 	@Override
