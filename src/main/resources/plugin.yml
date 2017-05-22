@@ -6,4 +6,14 @@ author: NLThijs48
 website: http://github.com/NLthijs48/ErrorSink
 load: STARTUP
 # Ask to load before commonly used plugin to try loading as first and disabling last
-loadbefore: ["Vault", "WorldEdit", "ProtocolLib"]
+loadbefore:
+  - Vault
+  - WorldEdit
+  - ProtocolLib
+  - LuckPerms
+  - AsyncWorldEditInjector
+  - MinecraftMarket
+  - OpenInv
+  - dynmap
+  - OreBroadcast
+  - GoldRush
