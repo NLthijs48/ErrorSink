@@ -34,6 +34,7 @@ serverName: ""
 
 # Filter and modify logging events (anything that is logged to latest.log is an event)
 events:
+
   # Drop events that match any of the rules (to filter out spam and false positives)
   filters:
     info:
@@ -87,6 +88,8 @@ events:
     #  release:
     #  # Set the platform (displayed as tag)
     #  platform:
+    #  # Bypass the filters and always report this event
+    #  bypassFilters: <true|false>
 
     ruleName:
       # Use the rule options here

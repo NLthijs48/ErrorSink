@@ -15,6 +15,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class RuleFilter extends AbstractFilter {
 
+	private ConfigurationSection filters;
 	private ConfigurationSection rules;
 
 	/**
@@ -22,7 +23,8 @@ public class RuleFilter extends AbstractFilter {
 	 */
 	public RuleFilter() {
 		super(Filter.Result.DENY, Filter.Result.NEUTRAL);
-		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("events.filters");
+		filters = ErrorSink.getInstance().getConfig().getConfigurationSection("events.filters");
+		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("events.rules");
 	}
 
 	/**
@@ -32,12 +34,29 @@ public class RuleFilter extends AbstractFilter {
 	 */
 	private Filter.Result process(String message, Level level, Throwable throwable, String threadName, String loggerName) {
 		try {
-			if(rules == null) {
+			if(filters == null) {
 				return onMismatch;
 			}
 
-			// Match all rules
-			for(String ruleKey : rules.getKeys(false)) {
+			// Check if this event should bypass the filters
+			if(rules != null) {
+				// Match all rules
+				for(String ruleKey : rules.getKeys(false)) {
+					// Match event
+					if(rules.getBoolean(ruleKey + ".bypassFilters") && ErrorSink.getInstance().match(
+							"events.rules." + ruleKey,
+							message,
+							level,
+							throwable,
+							threadName,
+							loggerName) != null) {
+						return onMismatch;
+					}
+				}
+			}
+
+			// Match all filters
+			for(String ruleKey : filters.getKeys(false)) {
 				// Match event
 				if(ErrorSink.getInstance().match(
 						"events.filters." + ruleKey,
@@ -51,7 +70,7 @@ public class RuleFilter extends AbstractFilter {
 			}
 		} catch(Exception e) {
 			// Causing exceptions within a filter will crash the server, therefore we catch everything
-			Log.error("Filter failed to execute rules:", ExceptionUtils.getStackTrace(e));
+			Log.error("Filter failed to execute filters:", ExceptionUtils.getStackTrace(e));
 		}
 
 		return onMismatch;
