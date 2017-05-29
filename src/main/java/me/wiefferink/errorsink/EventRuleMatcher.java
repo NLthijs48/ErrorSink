@@ -35,8 +35,9 @@ public class EventRuleMatcher {
 			criteria = new YamlConfiguration();
 		}
 		this.criteria = criteria;
-		if(this.parts != null) {
-			for(String partKey : parts.getKeys(false)) {
+        this.parts = new HashMap<>();
+        if (parts != null) {
+            for(String partKey : parts.getKeys(false)) {
 				String replacement = parts.getString(partKey);
 				if(replacement == null || replacement.isEmpty()) {
 					continue;
