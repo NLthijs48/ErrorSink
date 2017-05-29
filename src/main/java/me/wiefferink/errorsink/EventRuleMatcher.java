@@ -28,12 +28,27 @@ public class EventRuleMatcher {
 	private List<Pattern> loggerNamePatterns;
 
 	private ConfigurationSection criteria;
+	private Map<String, String> parts;
 
-	public EventRuleMatcher(ConfigurationSection criteria) {
+	public EventRuleMatcher(ConfigurationSection criteria, ConfigurationSection parts) {
 		if(criteria == null) {
 			criteria = new YamlConfiguration();
 		}
 		this.criteria = criteria;
+		if(this.parts != null) {
+			for(String partKey : parts.getKeys(false)) {
+				String replacement = parts.getString(partKey);
+				if(replacement == null || replacement.isEmpty()) {
+					continue;
+				}
+
+				// Make part available by name of the key
+				this.parts.put(
+						"{" + partKey + "}",
+						"(?<" + Pattern.quote(partKey) + ">" + replacement + ")"
+				);
+			}
+		}
 
 		Log.debug("Preparing EventRuleMatcher:", criteria.getCurrentPath());
 
@@ -83,10 +98,16 @@ public class EventRuleMatcher {
 		if(regexes != null) {
 			result = new ArrayList<>();
 			for(String regex : regexes) {
+				// Prepare regex
+				for(String partKey : parts.keySet()) {
+					regex = regex.replace(partKey, parts.get(partKey));
+				}
+
+				// Compile regex
 				try {
 					result.add(Pattern.compile(regex));
 				} catch(PatternSyntaxException e) {
-					Log.warn("Incorrect exception regex \"" + regex + "\" at", criteria.getCurrentPath() + "." + path + ":", ExceptionUtils.getStackTrace(e));
+					Log.warn("Incorrect regex: \"" + regex + "\" at", criteria.getCurrentPath() + "." + path + ":", ExceptionUtils.getStackTrace(e));
 				}
 			}
 		}

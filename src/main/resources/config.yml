@@ -47,8 +47,8 @@ events:
         # One line warning message before printing actual exceptions from async threads
         - "^Exception in thread \"(Craft Scheduler )?Thread - \\d+\" $"
         # Vanilla/Spigot problems that cannot be fixed (could indicate lag though)
-        - "^[a-zA-Z0-9_]{1,16} moved too quickly!"
-        - "^[a-zA-Z0-9_]{1,16} moved wrongly!"
+        - "^{player} moved too quickly!"
+        - "^{player} moved wrongly!"
         # Spigot bug
         - "^handleDisconnection\\(\\) called twice$"
     onlinePlayersException:
@@ -90,9 +90,10 @@ events:
     #  platform:
     #  # Bypass the filters and always report this event
     #  bypassFilters: <true|false>
-
-    ruleName:
-      # Use the rule options here
+    pluginAsTag:
+      matchMessage: "^\\[{plugin}\\] .+"
+      tags:
+        Plugin: "{plugin}"
 
 # Filter and change events when they are used as breadcrumb for events
 # Events on sentry will show a list of events leading up to the event, which are called breadcrumbs
@@ -142,7 +143,7 @@ breadcrumbs:
       type: "default"
     # Plugin name as category
     category:
-      matchMessage: "^\\[(?<plugin>[a-zA-Z0-9-_]+)\\] (?<message>.*)$"
+      matchMessage: "^\\[{plugin}\\] (?<message>.*)$"
       category: "{plugin}"
       message: "{message}"
     # Chat as user activity
@@ -151,6 +152,14 @@ breadcrumbs:
       category: "Chat"
       type: "user"
 
+
+# Regex parts can be defined here to use in the regexes of the rules and filters
+# Use a part with {player}, the match can be used as replacement with the same variable (to insert it into event data)
+parts:
+  player: "[a-zA-Z0-9_]{1,16}"
+  ip: "(?<ipv4>(?:[0-9]{1,3}\\.){3}[0-9]{1,3})|(?<ipv6>(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4})"
+  uuid: "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+  plugin: "[a-zA-Z0-9-_]+"
 
 # Enable sending stats to http://bstats.org/.
 # Providing these anonymous stats to me encourages me to continue development

@@ -82,7 +82,7 @@ public class ErrorSink extends JavaPlugin {
 			ConfigurationSection matchSection = getConfig().getConfigurationSection(matchSectionName);
 			if(matchSection != null) {
 				for(String eventRuleKey : matchSection.getKeys(false)) {
-					matcherMap.put(matchSection.getCurrentPath() + "." + eventRuleKey, new EventRuleMatcher(matchSection.getConfigurationSection(eventRuleKey)));
+					matcherMap.put(matchSection.getCurrentPath() + "." + eventRuleKey, new EventRuleMatcher(matchSection.getConfigurationSection(eventRuleKey), getConfig().getConfigurationSection("parts")));
 				}
 			}
 		}
