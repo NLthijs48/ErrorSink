@@ -4,13 +4,21 @@ import com.getsentry.raven.event.EventBuilder;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public abstract class EventEditor {
+
+	private Random random;
+
+	public EventEditor() {
+		random = new Random();
+	}
 
 	/**
 	 * Process and incoming event
@@ -68,9 +76,15 @@ public abstract class EventEditor {
 		if(target == null) {
 			return null;
 		}
+
+		// Apply given replacements
 		for(String replaceKey : replacements.keySet()) {
 			target = target.replace("{" + replaceKey + "}", replacements.get(replaceKey));
 		}
+
+		// Apply static replacements
+		target = target.replace("{random}", new BigInteger(130, random).toString(32));
+
 		return target;
 	}
 
