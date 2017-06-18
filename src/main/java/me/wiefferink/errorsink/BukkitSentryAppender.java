@@ -45,10 +45,17 @@ public class BukkitSentryAppender extends SentryAppender {
 	/**
 	 * Shutdown this appender and the used EventEditors
 	 */
-	public void shutdown() {
+	public void stop() {
+		super.stop();
 		for(EventEditor editor : eventEditors) {
 			editor.shutdown();
 		}
+	}
+
+	// Change the name of the appender, multiple with the same name does not work (probably used as key in a map somewhere)
+	@Override
+	public String getName() {
+		return "ErrorSinkAppender";
 	}
 
 	/**
@@ -102,7 +109,7 @@ public class BukkitSentryAppender extends SentryAppender {
 		}
 
 		// Message format (if message formatting is used)
-		if(eventMessage.getFormattedMessage() != null && !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
+		if(eventMessage.getFormat() != null && eventMessage.getFormattedMessage() != null && !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
 			eventBuilder.withSentryInterface(new MessageInterface(
 					eventMessage.getFormat(),
 					formatMessageParameters(eventMessage.getParameters()),

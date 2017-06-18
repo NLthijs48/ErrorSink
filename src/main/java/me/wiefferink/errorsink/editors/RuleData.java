@@ -6,7 +6,6 @@ import me.wiefferink.errorsink.ErrorSink;
 import me.wiefferink.errorsink.tools.Log;
 import me.wiefferink.errorsink.tools.Utils;
 import org.apache.logging.log4j.core.LogEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
@@ -14,15 +13,9 @@ import java.util.Map;
 
 public class RuleData extends EventEditor {
 
-	private String bukkitVersion;
 	private ConfigurationSection rules;
 
 	public RuleData() {
-		// Clean Bukkit version
-		bukkitVersion = Bukkit.getBukkitVersion();
-		if(bukkitVersion.endsWith("-SNAPSHOT")) {
-			bukkitVersion = bukkitVersion.substring(0, bukkitVersion.lastIndexOf("-SNAPSHOT"));
-		}
 		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("events.rules");
 	}
 
@@ -31,12 +24,6 @@ public class RuleData extends EventEditor {
 		// Plugin information
 		eventBuilder.withServerName(ErrorSink.getInstance().getServerName());
 		eventBuilder.withRelease(ErrorSink.getInstance().getRelease());
-
-		// Server information
-		eventBuilder.withTag("API", bukkitVersion);
-		eventBuilder.withExtra("Online players", Bukkit.getOnlinePlayers().size());
-		eventBuilder.withExtra("Bukkit", Bukkit.getBukkitVersion());
-		eventBuilder.withExtra("CraftBukkit", Bukkit.getVersion());
 
 		// Config rules
 		if(rules != null) {

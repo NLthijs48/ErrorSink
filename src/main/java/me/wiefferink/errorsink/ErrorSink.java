@@ -2,10 +2,12 @@ package me.wiefferink.errorsink;
 
 import com.getsentry.raven.Raven;
 import com.getsentry.raven.RavenFactory;
+import com.getsentry.raven.dsn.Dsn;
 import com.getsentry.raven.dsn.InvalidDsnException;
 import me.wiefferink.errorsink.editors.Breadcrumbs;
 import me.wiefferink.errorsink.editors.PluginInformation;
 import me.wiefferink.errorsink.editors.RuleData;
+import me.wiefferink.errorsink.editors.ServerInformation;
 import me.wiefferink.errorsink.editors.StackInformation;
 import me.wiefferink.errorsink.filters.ErrorSinkFilter;
 import me.wiefferink.errorsink.filters.RuleFilter;
@@ -111,7 +113,7 @@ public class ErrorSink extends JavaPlugin {
 		Logger logger = (Logger)LogManager.getRootLogger();
 		if(appender != null) {
 			logger.removeAppender(appender);
-			appender.shutdown();
+			appender.stop();
 		}
 
 		HandlerList.unregisterAll(this);
@@ -150,7 +152,7 @@ public class ErrorSink extends JavaPlugin {
 	public void startCollecting(String dsn) {
 		// Setup connection to Sentry.io
 		try {
-			raven = RavenFactory.ravenInstance(dsn);
+			raven = RavenFactory.ravenInstance(new Dsn(dsn), bukkitRavenFactory.getClass().getName());
 		} catch(InvalidDsnException | IllegalArgumentException e) {
 			Log.error("Provided Sentry DSN is invalid:", ExceptionUtils.getStackTrace(e));
 			return;
@@ -168,6 +170,7 @@ public class ErrorSink extends JavaPlugin {
 		// Editors
 		appender.addEventEditor(new RuleData());
 		appender.addEventEditor(new StackInformation());
+		appender.addEventEditor(new ServerInformation());
 		appender.addEventEditor(new PluginInformation());
 
 		// Default data
@@ -248,7 +251,7 @@ public class ErrorSink extends JavaPlugin {
 				Method method = event.getClass().getMethod("getMillis");
 				return (long) method.invoke(event);
 			} catch(NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				Log.debug("Failed to use getMillis on LogEvent:", ExceptionUtils.getStackFrames(e));
+				Log.debug("Failed to use getMillis on LogEvent:", ExceptionUtils.getStackTrace(e));
 				// Return something that is kind of close
 				return Calendar.getInstance().getTimeInMillis();
 			}
