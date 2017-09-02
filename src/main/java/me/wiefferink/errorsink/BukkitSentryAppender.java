@@ -1,13 +1,11 @@
 package me.wiefferink.errorsink;
 
-import com.getsentry.raven.Raven;
-import com.getsentry.raven.event.Event;
-import com.getsentry.raven.event.EventBuilder;
-import com.getsentry.raven.event.interfaces.ExceptionInterface;
-import com.getsentry.raven.event.interfaces.MessageInterface;
-import com.getsentry.raven.event.interfaces.SentryException;
-import com.getsentry.raven.log4j2.SentryAppender;
-import com.getsentry.raven.util.Util;
+import io.sentry.event.Event;
+import io.sentry.event.EventBuilder;
+import io.sentry.event.interfaces.ExceptionInterface;
+import io.sentry.event.interfaces.MessageInterface;
+import io.sentry.event.interfaces.SentryException;
+import io.sentry.log4j2.SentryAppender;
 import me.wiefferink.errorsink.editors.EventEditor;
 import me.wiefferink.errorsink.tools.Log;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -18,7 +16,6 @@ import org.apache.logging.log4j.message.Message;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,9 +25,7 @@ public class BukkitSentryAppender extends SentryAppender {
 
 	private Set<EventEditor> eventEditors;
 
-	public BukkitSentryAppender(Raven raven) {
-		super(raven);
-
+	public BukkitSentryAppender() {
 		eventEditors = new HashSet<>();
 	}
 
@@ -83,33 +78,21 @@ public class BukkitSentryAppender extends SentryAppender {
 	 * @return Event containing details provided by the logging system.
 	 */
 	@Override
-	protected Event buildEvent(LogEvent event) {
+	protected EventBuilder createEventBuilder(LogEvent event) {
 		// Basics
 		Message eventMessage = event.getMessage();
 		EventBuilder eventBuilder = new EventBuilder()
+				.withSdkIntegration("log4j2")
 				.withTimestamp(new Date(ErrorSink.getInstance().getTimeStamp(event)))
 				.withMessage(eventMessage.getFormattedMessage())
 				.withLogger(event.getLoggerName())
 				.withLevel(levelToEventLevel(event.getLevel()))
 				.withExtra(THREAD_NAME, event.getThreadName());
 
-		// Servername
-		if(!Util.isNullOrEmpty(serverName)) {
-			eventBuilder.withServerName(serverName.trim());
-		}
-
-		// Release version
-		if(!Util.isNullOrEmpty(release)) {
-			eventBuilder.withRelease(release.trim());
-		}
-
-		// Environment
-		if(!Util.isNullOrEmpty(environment)) {
-			eventBuilder.withEnvironment(environment.trim());
-		}
-
 		// Message format (if message formatting is used)
-		if(eventMessage.getFormat() != null && eventMessage.getFormattedMessage() != null && !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
+		if(eventMessage.getFormat() != null
+				&& eventMessage.getFormattedMessage() != null
+				&& !eventMessage.getFormattedMessage().equals(eventMessage.getFormat())) {
 			eventBuilder.withSentryInterface(new MessageInterface(
 					eventMessage.getFormat(),
 					formatMessageParameters(eventMessage.getParameters()),
@@ -148,29 +131,10 @@ public class BukkitSentryAppender extends SentryAppender {
 			eventBuilder.withExtra(LOG4J_NDC, event.getContextStack().asList());
 		}
 
-		// Global context
-		if(event.getContextMap() != null) {
-			for(Map.Entry<String, String> contextEntry : event.getContextMap().entrySet()) {
-				if(extraTags.contains(contextEntry.getKey())) {
-					eventBuilder.withTag(contextEntry.getKey(), contextEntry.getValue());
-				} else {
-					eventBuilder.withExtra(contextEntry.getKey(), contextEntry.getValue());
-				}
-			}
-		}
-
 		// Log4j marker
 		if(event.getMarker() != null) {
 			eventBuilder.withTag(LOG4J_MARKER, event.getMarker().getName());
 		}
-
-		// Global tags
-		for(Map.Entry<String, String> tagEntry : tags.entrySet()) {
-			eventBuilder.withTag(tagEntry.getKey(), tagEntry.getValue());
-		}
-
-		// Event builders registered in Raven
-		raven.runBuilderHelpers(eventBuilder);
 
 		// Run EventEditors
 		for(EventEditor eventEditor : eventEditors) {
@@ -183,6 +147,6 @@ public class BukkitSentryAppender extends SentryAppender {
 
 		Log.debug("Sending event to sentry:", eventBuilder);
 		ErrorSink.getInstance().increaseMessageSent();
-		return eventBuilder.build();
+		return eventBuilder;
 	}
 }

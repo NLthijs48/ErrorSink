@@ -1,6 +1,6 @@
 package me.wiefferink.errorsink.editors;
 
-import com.getsentry.raven.event.EventBuilder;
+import io.sentry.event.EventBuilder;
 import org.apache.logging.log4j.core.LogEvent;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class StackInformation extends EventEditor {
 	private final static Set<String> ignoreStack = new HashSet<>(Arrays.asList(
 			"^me.wiefferink.errorsink", // Own collection classes
 			"^java.util.logging.Logger", // Logging getting to this class
-			"^com.getsentry", // Raven building the event
+			"^io.sentry", // Sentry building the event
 			"^java.util.logging.Logger", // Java logging
 			"^org.apache.logging.log4j", // Log4j
 			"^java.lang.Thread.getStackTrace", // Getting stacktrace

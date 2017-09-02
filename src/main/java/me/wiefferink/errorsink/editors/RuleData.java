@@ -1,7 +1,7 @@
 package me.wiefferink.errorsink.editors;
 
-import com.getsentry.raven.event.Event;
-import com.getsentry.raven.event.EventBuilder;
+import io.sentry.event.Event;
+import io.sentry.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
 import me.wiefferink.errorsink.tools.Log;
 import me.wiefferink.errorsink.tools.Utils;

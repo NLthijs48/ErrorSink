@@ -19,7 +19,8 @@ import java.util.regex.PatternSyntaxException;
 
 public class EventRuleMatcher {
 
-	private static final Pattern NAMED_GROUPS = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>");
+	// Regex to find named groups inside a regex (the named group-name might be escaped with '\Q'<group>'\E', which this also accounts for)
+	private static final Pattern NAMED_GROUPS = Pattern.compile("\\(\\?<(\\\\Q)?(?<group>[a-zA-Z][a-zA-Z0-9]*)(\\\\E)?>");
 
 	private Set<Integer> levelMatches;
 	private List<Pattern> messagePatterns;
@@ -134,9 +135,9 @@ public class EventRuleMatcher {
 				Matcher groupMatcher = NAMED_GROUPS.matcher(pattern.pattern());
 				while(groupMatcher.find()) {
 					try {
-						replacements.put(groupMatcher.group(1), matcher.group(groupMatcher.group(1)));
+						replacements.put(groupMatcher.group("group"), matcher.group(groupMatcher.group("group")));
 					} catch(IllegalArgumentException ignored) {
-
+						ignored.printStackTrace();
 					}
 				}
 
@@ -173,7 +174,7 @@ public class EventRuleMatcher {
 		}
 
 		// Exception match
-		if(exceptionPatterns != null && throwable != null && !matchesAny(ExceptionUtils.getStackTrace(throwable), exceptionPatterns, groups)) {
+		if(exceptionPatterns != null && (throwable == null || !matchesAny(ExceptionUtils.getStackTrace(throwable), exceptionPatterns, groups))) {
 			return null;
 		}
 

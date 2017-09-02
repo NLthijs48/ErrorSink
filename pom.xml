@@ -6,7 +6,7 @@
 
     <groupId>me.wiefferink</groupId>
     <artifactId>errorsink</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <name>ErrorSink</name>
 
     <properties>
@@ -36,11 +36,11 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Raven-Java log4j2 bindings to send events to Sentry.io -->
+        <!-- Sentry-Java log4j2 bindings to send events to Sentry.io -->
         <dependency>
-            <groupId>com.getsentry.raven</groupId>
-            <artifactId>raven-log4j2</artifactId>
-            <version>8.0.2</version>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-log4j2</artifactId>
+            <version>1.5.2</version>
         </dependency>
 
         <!-- Prevent Raven-Java warning about logging framework -->
@@ -183,7 +183,7 @@
                     <relocations>
                         <!-- Relocate Sentry -->
                         <relocation>
-                            <pattern>com.getsentry</pattern>
+                            <pattern>io.sentry</pattern>
                             <shadedPattern>me.wiefferink.errorsink.shaded.sentry</shadedPattern>
                         </relocation>
                         <!-- Relocate bstats -->

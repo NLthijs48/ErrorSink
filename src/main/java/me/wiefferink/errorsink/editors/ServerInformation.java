@@ -1,6 +1,6 @@
 package me.wiefferink.errorsink.editors;
 
-import com.getsentry.raven.event.EventBuilder;
+import io.sentry.event.EventBuilder;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
 

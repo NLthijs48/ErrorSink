@@ -51,10 +51,17 @@ events:
         - "^{player} moved wrongly!"
         # Spigot bug
         - "^handleDisconnection\\(\\) called twice$"
+    # Common error for old plugins (hard to fix sometimes)
     onlinePlayersException:
       matchException:
-        # Common error for old plugins (hard to fix sometimes)
         - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
+    # Offline mode warning (servers using BungeeCord will always have this)
+    offlineModeWarnings:
+      matchMessage:
+        - "^\\*\\*\\*\\* SERVER IS RUNNING IN OFFLINE/INSECURE MODE!$"
+        - "^The server will make no attempt to authenticate usernames. Beware.$"
+        - "^While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.$"
+        - "^To change this, set \"online-mode\" to \"true\" in the server.properties file.$"
 
   # Add information to events and/or change their properties
   rules:

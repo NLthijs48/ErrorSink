@@ -1,8 +1,8 @@
 package me.wiefferink.errorsink.editors;
 
-import com.getsentry.raven.event.Breadcrumb;
-import com.getsentry.raven.event.BreadcrumbBuilder;
-import com.getsentry.raven.event.EventBuilder;
+import io.sentry.event.Breadcrumb;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.EventBuilder;
 import me.wiefferink.errorsink.ErrorSink;
 import me.wiefferink.errorsink.tools.Log;
 import org.apache.commons.lang.exception.ExceptionUtils;

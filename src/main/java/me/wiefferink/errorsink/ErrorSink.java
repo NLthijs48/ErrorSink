@@ -1,9 +1,8 @@
 package me.wiefferink.errorsink;
 
-import com.getsentry.raven.Raven;
-import com.getsentry.raven.RavenFactory;
-import com.getsentry.raven.dsn.Dsn;
-import com.getsentry.raven.dsn.InvalidDsnException;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
+import io.sentry.dsn.InvalidDsnException;
 import me.wiefferink.errorsink.editors.Breadcrumbs;
 import me.wiefferink.errorsink.editors.PluginInformation;
 import me.wiefferink.errorsink.editors.RuleData;
@@ -37,11 +36,11 @@ import java.util.Map;
 public class ErrorSink extends JavaPlugin {
 
 	private static ErrorSink instance;
-	private Raven raven;
+	private SentryClient sentryClient;
 	private BukkitSentryAppender appender;
 	private Map<String, EventRuleMatcher> matcherMap;
 	private int messagesSent = 0;
-	private BukkitRavenFactory bukkitRavenFactory;
+	private BukkitSentryClientFactory bukkitSentryClientFactory;
 	public static boolean hasOldLog4j2;
 
 	/**
@@ -68,9 +67,7 @@ public class ErrorSink extends JavaPlugin {
 		}
 		Log.debug("Has old Log4j2:", hasOldLog4j2);
 
-		bukkitRavenFactory = new BukkitRavenFactory();
-		// Add factory, normally done automatically but we relocated the Sentry classes
-		RavenFactory.registerFactory(bukkitRavenFactory);
+		bukkitSentryClientFactory = new BukkitSentryClientFactory();
 
 		String dsn = getConfig().getString("dsn");
 		if(dsn == null || dsn.isEmpty()) {
@@ -94,13 +91,13 @@ public class ErrorSink extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		ErrorSink.getInstance().getServer().getPluginManager().registerEvents(bukkitRavenFactory, ErrorSink.getInstance());
+		ErrorSink.getInstance().getServer().getPluginManager().registerEvents(bukkitSentryClientFactory, ErrorSink.getInstance());
 		// All plugins loaded now, update packages
-		bukkitRavenFactory.updateInAppFrames();
+		bukkitSentryClientFactory.updateInAppFrames();
 		// Services should now be registered
-		Utils.run(bukkitRavenFactory::updateInAppFrames);
+		Utils.run(bukkitSentryClientFactory::updateInAppFrames);
 		// Just to be sure
-		Utils.run(20L, bukkitRavenFactory::updateInAppFrames);
+		Utils.run(20L, bukkitSentryClientFactory::updateInAppFrames);
 
 		if(getConfig().getBoolean("sendStats")) {
 			Analytics.start();
@@ -152,20 +149,20 @@ public class ErrorSink extends JavaPlugin {
 	public void startCollecting(String dsn) {
 		// Setup connection to Sentry.io
 		try {
-			raven = RavenFactory.ravenInstance(new Dsn(dsn), bukkitRavenFactory.getClass().getName());
+			sentryClient = Sentry.init(dsn, new BukkitSentryClientFactory());
 		} catch(InvalidDsnException | IllegalArgumentException e) {
 			Log.error("Provided Sentry DSN is invalid:", ExceptionUtils.getStackTrace(e));
 			return;
 		}
-
 		Logger logger = (Logger)LogManager.getRootLogger();
 
 		// Start collecting errors from the Logger
-		appender = new BukkitSentryAppender(raven);
+		appender = new BukkitSentryAppender();
 
 		// Filters
 		appender.addFilter(new ErrorSinkFilter());
 		appender.addFilter(new RuleFilter());
+
 
 		// Editors
 		appender.addEventEditor(new RuleData());
@@ -174,8 +171,8 @@ public class ErrorSink extends JavaPlugin {
 		appender.addEventEditor(new PluginInformation());
 
 		// Default data
-		appender.setServerName(getServerName());
-		appender.setRelease(getRelease());
+		sentryClient.setServerName(getServerName());
+		sentryClient.setRelease(getRelease());
 
 		// Start the collector
 		appender.start();
@@ -214,8 +211,8 @@ public class ErrorSink extends JavaPlugin {
 	 * Get the Raven instance, for example for adding extra BuilderHelpers
 	 * @return The used Raven instance
 	 */
-	public Raven getRaven() {
-		return raven;
+	public SentryClient getSentryClient() {
+		return sentryClient;
 	}
 
 	/**

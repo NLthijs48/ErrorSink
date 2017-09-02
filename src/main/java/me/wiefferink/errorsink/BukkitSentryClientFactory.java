@@ -1,7 +1,7 @@
 package me.wiefferink.errorsink;
 
-import com.getsentry.raven.DefaultRavenFactory;
-import com.getsentry.raven.dsn.Dsn;
+import io.sentry.DefaultSentryClientFactory;
+import io.sentry.dsn.Dsn;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,11 +14,11 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class BukkitRavenFactory extends DefaultRavenFactory implements Listener {
+public class BukkitSentryClientFactory extends DefaultSentryClientFactory implements Listener {
 
 	private Collection<String> inAppFrames;
 
-	public BukkitRavenFactory() {
+	public BukkitSentryClientFactory() {
 		super();
 
 		inAppFrames = new HashSet<>();
@@ -44,8 +44,6 @@ public class BukkitRavenFactory extends DefaultRavenFactory implements Listener 
 				addPackageByClassName(provider.getProvider().getClass().getName());
 			}
 		}
-
-		// TODO: add org.bukkit to the list or not?
 	}
 
 	private void addPackageByClassName(String name) {
