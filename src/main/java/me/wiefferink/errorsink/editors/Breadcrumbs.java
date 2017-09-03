@@ -59,7 +59,7 @@ public class Breadcrumbs extends EventEditor {
 				}
 
 				synchronized(breadcrumbs) {
-					breadcrumbs.add(event);
+					breadcrumbs.add(event.toImmutable());
 					if(breadcrumbs.size() > maximumEntries) {
 						breadcrumbs.removeFirst();
 					}
