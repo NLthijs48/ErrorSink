@@ -30,12 +30,20 @@ public class Breadcrumbs extends EventEditor {
 	private Appender breadcrumbAppender;
 	private ConfigurationSection rules;
 	private ConfigurationSection filters;
+	private boolean hasImmutableMethod = false;
 
 	public Breadcrumbs(Logger logger) {
 		this.logger = logger;
 		rules = ErrorSink.getInstance().getConfig().getConfigurationSection("breadcrumbs.rules");
 		filters = ErrorSink.getInstance().getConfig().getConfigurationSection("breadcrumbs.filters");
 		maximumEntries = ErrorSink.getInstance().getConfig().getInt("breadcrumbs.maximumEntries", 50);
+
+		// Test if LogEvent has toImmutable()
+		try {
+			LogEvent.class.getMethod("toImmutable");
+			hasImmutableMethod = true;
+		} catch(Exception ignored) {
+		}
 
 		breadcrumbAppender = new AbstractAppender("Breadcrumb Builder", null, null, false) {
 			@Override
@@ -59,7 +67,11 @@ public class Breadcrumbs extends EventEditor {
 				}
 
 				synchronized(breadcrumbs) {
-					breadcrumbs.add(event.toImmutable());
+					if(hasImmutableMethod) {
+						event = event.toImmutable();
+					}
+
+					breadcrumbs.add(event);
 					if(breadcrumbs.size() > maximumEntries) {
 						breadcrumbs.removeFirst();
 					}
