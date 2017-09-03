@@ -51,10 +51,13 @@ events:
         - "^{player} moved wrongly!"
         # Spigot bug
         - "^handleDisconnection\\(\\) called twice$"
+        # Statistic warnings because of upgrade to 1.12 (renamed to advancements)
+        - "^Invalid statistic in"
     # Common error for old plugins (hard to fix sometimes)
     onlinePlayersException:
       matchException:
         - "java.lang.NoSuchMethodError: org.bukkit.Server.getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
+        - "org.bukkit.Server._INVALID_getOnlinePlayers\\(\\)\\[Lorg/bukkit/entity/Player"
     # Offline mode warning (servers using BungeeCord will always have this)
     offlineModeWarnings:
       matchMessage:
@@ -101,6 +104,13 @@ events:
       matchMessage: "^\\[{plugin}\\] .+"
       tags:
         Plugin: "{plugin}"
+    # Ensures only 1 issue is created in Sentry for these messages (each of these is added as an event to the same issue)
+    mergeFloatingTooLong:
+      matchMessage: "^{player} was kicked for floating too long!$"
+      fingerprint: "floatingTooLong"
+      tags:
+        Player: "{player}"
+
 
 # Filter and change events when they are used as breadcrumb for events
 # Events on sentry will show a list of events leading up to the event, which are called breadcrumbs
