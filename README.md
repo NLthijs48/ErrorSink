@@ -40,3 +40,5 @@ Overview of an issue as shown on the web interface of Sentry (everything between
     * By default Sentry has some data scrubbers enabled, you can turn them off in the `Project Settings`:
         * Disable `Data Scrubber`
         * Disable `Use Default Scrubbers`
+        
+[![Live-support-chat](https://user-images.githubusercontent.com/6951068/35104778-2a5e6e18-fc6a-11e7-8ffc-fd63adf3a24a.png)](https://99ms.gs/errorsink)
