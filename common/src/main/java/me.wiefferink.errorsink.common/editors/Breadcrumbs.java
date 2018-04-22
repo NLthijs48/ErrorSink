@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import io.sentry.event.Breadcrumb;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.EventBuilder;
-import me.wiefferink.errorsink.common.CommonUtils;
 import me.wiefferink.errorsink.common.ErrorSink;
 import me.wiefferink.errorsink.common.EventEditor;
 import me.wiefferink.errorsink.common.Log;

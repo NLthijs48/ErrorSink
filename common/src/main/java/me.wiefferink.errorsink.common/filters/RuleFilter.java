@@ -1,7 +1,6 @@
 package me.wiefferink.errorsink.common.filters;
 
 import com.google.common.collect.Lists;
-import me.wiefferink.errorsink.common.CommonUtils;
 import me.wiefferink.errorsink.common.ErrorSink;
 import me.wiefferink.errorsink.common.Log;
 import ninja.leaping.configurate.ConfigurationNode;

@@ -5,7 +5,6 @@ import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.dsn.InvalidDsnException;
 import io.sentry.event.EventBuilder;
-import me.wiefferink.errorsink.common.CommonUtils;
 import me.wiefferink.errorsink.common.ErrorSink;
 import me.wiefferink.errorsink.common.ErrorSinkPlugin;
 import me.wiefferink.errorsink.common.ErrorSinkSentryAppender;
@@ -14,7 +13,6 @@ import me.wiefferink.errorsink.common.Log;
 import me.wiefferink.errorsink.common.editors.Breadcrumbs;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -35,11 +33,9 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,8 +109,6 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
             Log.error("Provided Sentry DSN is invalid:", ExceptionUtils.getStackTrace(e));
             return;
         }
-
-        CommonUtils.initialzeMatchers();
 
         org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger)LogManager.getRootLogger();
 

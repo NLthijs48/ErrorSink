@@ -4,7 +4,6 @@ import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.dsn.InvalidDsnException;
 import io.sentry.event.EventBuilder;
-import me.wiefferink.errorsink.common.CommonUtils;
 import me.wiefferink.errorsink.common.ErrorSink;
 import me.wiefferink.errorsink.common.ErrorSinkPlugin;
 import me.wiefferink.errorsink.common.ErrorSinkSentryAppender;
@@ -16,7 +15,6 @@ import me.wiefferink.errorsink.spigot.tools.Utils;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
@@ -177,10 +175,6 @@ public class SpigotErrorSink extends JavaPlugin implements ErrorSinkPlugin {
 
 
 		Logger logger = (Logger)LogManager.getRootLogger();
-
-
-
-		CommonUtils.initialzeMatchers();
 
 		// Start collecting errors from the Logger
 		appender = new ErrorSinkSentryAppender();
