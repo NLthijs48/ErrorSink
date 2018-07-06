@@ -1,6 +1,7 @@
 package me.wiefferink.errorsink.common.editors;
 
 import io.sentry.event.EventBuilder;
+import io.sentry.event.interfaces.StackTraceInterface;
 import me.wiefferink.errorsink.common.EventEditor;
 import org.apache.logging.log4j.core.LogEvent;
 
@@ -43,8 +44,6 @@ public class StackInformation extends EventEditor {
 
 	@Override
 	public void processEvent(EventBuilder eventBuilder, LogEvent event) {
-		StringBuilder result = new StringBuilder();
-
 		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 		// Filter StackTraceElements
 		// After finding the first not-ignored frame we don't want to ignore anything anymore
@@ -70,20 +69,6 @@ public class StackInformation extends EventEditor {
 			filteredElements.add(element);
 		}
 
-		// Build breadcrumb data
-		for (StackTraceElement element : filteredElements) {
-			result
-					.append(element.getClassName())
-					.append(".")
-					.append(element.getMethodName())
-					.append("(")
-					.append(element.getFileName())
-					.append(":")
-					.append(element.getLineNumber())
-					.append(")")
-					.append("\n");
-		}
-
-		eventBuilder.withExtra("Stack", result.toString());
+		eventBuilder.withSentryInterface(new StackTraceInterface(filteredElements.toArray(new StackTraceElement[filteredElements.size()])));
 	}
 }
