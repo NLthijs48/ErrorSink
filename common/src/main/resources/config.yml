@@ -39,7 +39,7 @@ events:
   filters:
     info:
       # Drop info and debug messages
-      matchLevel: ["INFO", "DEBUG", "OFF"]
+      matchLevel: ["INFO", "DEBUG", "TRACE", "OFF"]
     spam:
       matchMessage:
         # Spammy line-by-line exceptions coming from Skrips
