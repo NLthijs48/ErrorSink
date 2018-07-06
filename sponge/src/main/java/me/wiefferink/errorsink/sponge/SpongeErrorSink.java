@@ -14,6 +14,7 @@ import me.wiefferink.errorsink.common.editors.Breadcrumbs;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
@@ -55,9 +56,7 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
     @DefaultConfig(sharedRoot = true)
     private Path defaultConfig;
 
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> configManager;
+    private YAMLConfigurationLoader configManager;
 
     private ConfigurationNode rootNode;
     private SpongeSentryClientFactory spongeSentryClientFactory;
@@ -65,19 +64,26 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
     private ErrorSinkSentryAppender appender;
     private Map<List<Object>, EventRuleMatcher> matcherMap = new HashMap<>();
 
+    private Path getYmlPath(Path confPath) {
+        int ext = confPath.getFileName().toString().indexOf(".conf");
+        return confPath.resolveSibling(confPath.getFileName().toString().substring(0, ext) + ".yml");
+    }
+
     @Listener
     public void onPreInit(GamePreInitializationEvent event) throws Exception {
+        this.defaultConfig = this.getYmlPath(this.defaultConfig);
         if (!Files.exists(this.defaultConfig)) {
             try (InputStream is = getClass().getClassLoader().getResourceAsStream("config.yml")) {
                 Files.copy(is, this.defaultConfig);
             }
         }
+        this.configManager = YAMLConfigurationLoader.builder().setPath(this.defaultConfig).build();
         this.rootNode = this.configManager.load();
         ErrorSink.init(this);
 
         spongeSentryClientFactory = new SpongeSentryClientFactory();
 
-        String dsn = this.rootNode.getString("dsn");
+        String dsn = this.rootNode.getNode("dsn").getString();
         if(dsn == null || dsn.isEmpty()) {
             this.logger.error("Provide a DSN from Sentry.io in the config to get started!");
             return;
@@ -180,7 +186,7 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
 
     @Override
     public String getServerVersion() {
-        return Sponge.getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getVersion().get();
+        return Sponge.getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getVersion().orElse("UNKNOWN-SPONGE-IMPL");
     }
 
     @Override
@@ -190,7 +196,7 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
 
     @Override
     public void addExtraData(EventBuilder builder) {
-        builder.withExtra("SpongeAPI", Sponge.getGame().getPlatform().getContainer(Platform.Component.API).getVersion().get());
+        builder.withExtra("SpongeAPI", Sponge.getGame().getPlatform().getContainer(Platform.Component.API).getVersion().orElse("UNKNOWN-SPONGE-API"));
     }
 
 }
