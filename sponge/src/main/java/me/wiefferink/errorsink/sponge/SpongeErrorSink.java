@@ -117,6 +117,7 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
         }
 
         org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger)LogManager.getRootLogger();
+        org.apache.logging.log4j.core.Logger fmlLogger = (org.apache.logging.log4j.core.Logger)LogManager.getLogger("FML");
 
         // Start collecting errors from the Logger
         appender = new ErrorSinkSentryAppender();
@@ -128,9 +129,10 @@ public class SpongeErrorSink implements ErrorSinkPlugin {
         // Start the collector
         appender.start();
         logger.addAppender(appender);
+        fmlLogger.addAppender(appender);
 
         // Add later to prevent reported messages also appearing in the breadcrumbs
-        appender.addEventEditor(new Breadcrumbs(logger));
+        appender.addEventEditor(new Breadcrumbs(logger, fmlLogger));
     }
 
     /**

@@ -29,14 +29,14 @@ public class Breadcrumbs extends EventEditor {
 	private final LinkedList<LogEvent> breadcrumbs = new LinkedList<>();
 	private int maximumEntries = 50;
 	private Pattern tagPrefix = Pattern.compile("^\\[[a-zA-Z0-9-_]+\\] ");
-	private Logger logger;
+	private Logger[] loggers;
 	private Appender breadcrumbAppender;
 	private ConfigurationNode rules;
 	private ConfigurationNode filters;
 	private boolean hasImmutableMethod = false;
 
-	public Breadcrumbs(Logger logger) {
-		this.logger = logger;
+	public Breadcrumbs(Logger... loggers) {
+		this.loggers = loggers;
 		ConfigurationNode root = ErrorSink.getPlugin().getPluginConfig();
 		rules = root.getNode("breadcrumbs", "rules");
 		filters = root.getNode("breadcrumbs", "filters");
@@ -83,7 +83,9 @@ public class Breadcrumbs extends EventEditor {
 			}
 		};
 		breadcrumbAppender.start();
-		logger.addAppender(breadcrumbAppender);
+		for (Logger logger: this.loggers) {
+			logger.addAppender(breadcrumbAppender);
+		}
 	}
 
 	@Override
@@ -208,7 +210,9 @@ public class Breadcrumbs extends EventEditor {
 
 	@Override
 	public void shutdown() {
-		logger.removeAppender(breadcrumbAppender);
+		for (Logger logger: this.loggers) {
+			logger.removeAppender(breadcrumbAppender);
+		}
 	}
 
 }
