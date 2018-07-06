@@ -1,6 +1,3 @@
-# Maven stuff
-/target
-
 *.pydevproject
 .project
 .metadata
@@ -31,3 +28,9 @@ local.properties
 *.idea
 dependency-reduced-pom.xml
 *.iml
+
+run/
+
+common/target/
+sponge/target/
+spigot/target/
