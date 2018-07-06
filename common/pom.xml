@@ -18,7 +18,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-log4j2</artifactId>
-            <version>1.5.2</version>
+            <version>1.7.5</version>
         </dependency>
 
         <!-- Prevent Raven-Java warning about logging framework -->
