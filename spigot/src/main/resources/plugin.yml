@@ -1,0 +1,24 @@
+name: ErrorSink
+description: "Collect server errors and warnings in a beautiful web interface"
+main: me.wiefferink.errorsink.spigot.SpigotErrorSink
+version: "${project.version}"
+author: NLThijs48
+website: http://github.com/NLthijs48/ErrorSink
+load: STARTUP
+# Ask to load before commonly used plugin to try loading as first and disabling last
+loadbefore:
+  - Vault
+  - WorldEdit
+  - ProtocolLib
+  - LuckPerms
+  - AsyncWorldEditInjector
+  - MinecraftMarket
+  - OpenInv
+  - dynmap
+  - OreBroadcast
+  - GoldRush
+
+commands:
+   exception:
+      description: Generates a RuntimException
+      usage: /exception <message>
